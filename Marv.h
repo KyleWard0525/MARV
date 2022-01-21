@@ -96,21 +96,47 @@ class Marv {
       rightMotor.disableMotor();
     }
 
-    // Turn left for a given number of degrees
-    void turnLeft(int speed, int nDeg)
+    // Turn left at a given speed
+    void turnLeft(int speed, float duration)
     {
-      int mappedDelay = map(nDeg, 0, 360, 0, 100*speed);
-
+      // Compute movement duration in ms
+      int duration_ms = int(duration*1000); 
+      
       // Set motor directions
+      leftMotor.directionBackward();
       rightMotor.directionForward();
-      leftMotor.disableMotor();
+      leftMotor.enableMotor();
       rightMotor.enableMotor();
 
       // Set motor speed (start moving)
+      leftMotor.setSpeed(speed);
       rightMotor.setSpeed(speed);
 
       // Delay then turn of motors
-      delay(mappedDelay);
+      delay(duration_ms);
+      leftMotor.disableMotor();
+      rightMotor.disableMotor();
+    }
+
+    // Turn right at a given speed
+    void turnRight(int speed, float duration)
+    {
+      // Compute movement duration in ms
+      int duration_ms = int(duration*1000); 
+      
+      // Set motor directions
+      leftMotor.directionForward();
+      rightMotor.directionBackward();
+      leftMotor.enableMotor();
+      rightMotor.enableMotor();
+
+      // Set motor speed (start moving)
+      leftMotor.setSpeed(speed);
+      rightMotor.setSpeed(speed);
+
+      // Delay then turn of motors
+      delay(duration_ms);
+      leftMotor.disableMotor();
       rightMotor.disableMotor();
     }
 };
