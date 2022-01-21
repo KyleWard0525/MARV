@@ -30,9 +30,13 @@ void setup() {
   // Set buzzer pin as output
   pinMode(buzzerPin, OUTPUT);
 
-  robot.forward(10, 0.5);
-  robot.reverse(10, 0.75);
-  robot.turnLeft(25, 15);
+  robot.forward(25, 1);
+  delay(100);
+  robot.reverse(25, 1);
+  delay(100);
+  robot.turnLeft(25, 0.5); 
+  delay(100);
+  robot.turnRight(25, 1);
 }
 
 void loop() {
