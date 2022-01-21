@@ -13,7 +13,6 @@
 #include "Utils.h"
 #include "Bumpers.h"
 
-
 // Main class for controlling the robot
 class Marv {
 
