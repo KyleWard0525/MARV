@@ -41,9 +41,25 @@ class Marv {
     // Check bumpers for collision and handle response
     void checkBumpers()
     {
-      if(bumpSensors.checkForCollision() == true)
+      if(bumpSensors.checkForCollision())
       {
-        bumpSensors.alert(buzzerPin);
+        unsigned long start = millis();
+        
+        while(bumpSensors.checkForCollision())
+        {
+          //  Play alert
+          bumpSensors.alert(buzzerPin);
+
+          // Check if anyone has helped marv in the alloted time
+          if(millis() - start >= 250)
+          {
+            reverse(10, 1);
+          }
+        }
+        
+
+        // If no one saves the robot, try to save itself
+        //reverse(25, 1);
       } else {
         bumpSensors.setStatusLed(1);
       }
@@ -67,8 +83,15 @@ class Marv {
       leftMotor.setSpeed(speed);
       rightMotor.setSpeed(speed);
 
-      // Sleep for duration_ms then turn of motors
-      delay(duration_ms);
+      // Loop through duration_ms where i is 1ms
+      for(int i = 0; i < duration_ms; i++)
+      {
+        // Check if robot bumps into something
+        checkBumpers();
+
+        // Sleep for 5ms
+        delay(1);
+      }
       leftMotor.disableMotor();
       rightMotor.disableMotor();
     }
