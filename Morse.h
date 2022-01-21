@@ -1,3 +1,6 @@
+#ifndef MORSE_H
+#define MORSE_H
+
 /**
  * An attempt at creating a morse code library for MARV to communicate with
  * 
@@ -76,3 +79,6 @@ class Morse {
     }
 
 };
+
+
+#endif      //  End MORSE_H
