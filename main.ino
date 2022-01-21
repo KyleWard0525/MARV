@@ -31,12 +31,8 @@ void setup() {
   pinMode(buzzerPin, OUTPUT);
 
   robot.forward(25, 1);
-  delay(100);
-  robot.reverse(25, 1);
-  delay(100);
-  robot.turnLeft(25, 0.5); 
-  delay(100);
-  robot.turnRight(25, 1);
+  delay(500);
+  robot.turnRight(12, 1);
 }
 
 void loop() {
