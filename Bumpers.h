@@ -19,7 +19,7 @@ class Bumpers {
       setStatusLed(1);
       
       // Set buzzer frequency for collision alert
-      collisionFreq = 250;
+      collisionFreq = 240;
     }
 
     //  Check if one of the bumpers has been hit
