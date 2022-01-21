@@ -6,11 +6,12 @@
  */
 
 #include "Marv.h"
+#include "Morse.h"
 
 int buzzerPin = 2;
 
 Marv robot(buzzerPin);
-
+Morse morse(buzzerPin);
 
 void setup() {
   
@@ -30,9 +31,13 @@ void setup() {
   // Set buzzer pin as output
   pinMode(buzzerPin, OUTPUT);
 
-  robot.forward(25, 1);
-  delay(500);
-  robot.turnRight(12, 1);
+  morse.a();
+  morse.b();
+  morse.c();
+
+//  robot.forward(25, 1);
+//  delay(500);
+//  robot.turnRight(12, 1);
 }
 
 void loop() {
