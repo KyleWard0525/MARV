@@ -14,3 +14,15 @@ As of v0.0.1 (1/21/2022), MARV uses the following hardware:
 ## Software
 All of the software is being written in C/C++ using the Energia IDE
 
+## Features
+![MARV v0.0.1](images/MARV0.0.1.jpg)
+***MARV v0.0.1 shown above***
+
+As of version 0.0.1, MARV features:
+- Forward collision detection
+- Collision alert (via onboard LED and active buzzer)
+- Morse code communication through LED blinks and buzzer beeps
+
+### Demos
+**MARV Forward Collision Testing:**
+![MARV-FCT1](images/MarvBump.wmv)
