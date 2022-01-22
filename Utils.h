@@ -48,7 +48,13 @@ uint8_t readByte(uint16_t memAddr, uint8_t reg)
 //  Read bit value from device register at given position
 uint8_t readBit(uint16_t memAddr, uint8_t regAddr, int8_t bitPos)
 {
+  // Read whole byte from the register
   uint8_t regByte = readByte(memAddr, regAddr);
+
+  /*
+   * Select the bit by ANDing(clearing) the whole byte
+   * except for the one bit at bitPos
+   */
   uint8_t bitVal = (regByte & (1 << bitPos));
 
   if(bitVal)
