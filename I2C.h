@@ -64,7 +64,32 @@ class I2C {
       else {
         return 0;
       }
-    }
+   }
+
+   // Write byte to given device register
+   bool writeByte(uint16_t memAddr, uint8_t regAddr, uint8_t dataByte)
+   {
+    // Open I2C communication with device
+      Wire.beginTransmission(memAddr);
+    
+      // Select register to write to
+      Wire.write(regAddr);
+
+      // Write byte to register
+      Wire.write(dataByte);
+
+      // End communication
+      Wire.endTransmission();
+
+      // Ensure write operation was successful
+      if(readByte(memAddr, regAddr) == dataByte)
+      {
+        return true;
+      }
+      else {
+        return false;
+      }
+   }
 };
 
 
