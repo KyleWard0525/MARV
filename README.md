@@ -23,6 +23,8 @@ As of version 0.0.1, MARV features:
 - Collision alert (via onboard LED and active buzzer)
 - Morse code communication through LED blinks and buzzer beeps
 
-### Demos
-**MARV Forward Collision Testing:**
-![MARV-FCT1](images/MarvBump.wmv)
+## Upcoming Updates:
+- Collision avoidance
+- Follow mode (robot follows the user around)
+- Use measurements from IMU to determine orientation in order to get out of a bad spot
+- Add oscilating ultrasonic sensor assembly using stepper motor and 3 ultrasonic sensors in a triangle configuration in attempt to create a 3D map of the robot's current environment using ultrasound
