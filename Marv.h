@@ -7,32 +7,50 @@
  * kward
  */
 #include <Romi_Motor_Power.h>
+#include <Wire.h>
+#include <Math.h>
 #include "Energia.h"
 #include "GPIO.h"
 #include "RSLK_Pins.h"
 #include "Utils.h"
 #include "Bumpers.h"
+#include "I2C.h"
+#include "IMU.h"
+#include "Morse.h"
 
 // Main class for controlling the robot
 class Marv {
 
   private:
     int buzzerPin;
-    Bumpers bumpSensors;
-    Romi_Motor_Power leftMotor;
-    Romi_Motor_Power rightMotor;
+    int morseLedPin;
+
+    Bumpers bumpSensors;                  //  Interface for the bump sensors
+    Romi_Motor_Power leftMotor;           //  For controlling left wheel
+    Romi_Motor_Power rightMotor;          //  For controlling right wheel
+    
     
   public:
-
+    I2C serialBus;                        //  Reading and writing data of I2C channels
+    IMU* imu;                             //  Measuring acceleration and gyro forces
+    Morse* morse;                         //  Communcation with the outside world through Morse code
+    
     //  Main constructor
-    Marv(int buzzPin)
+    Marv(int buzzPin, int morsePin)
     { 
       // Set pins
       buzzerPin = buzzPin;
+      morseLedPin = morsePin;
 
       // Initialize motors
       leftMotor.begin(MOTOR_L_SLP_PIN,MOTOR_L_DIR_PIN,MOTOR_L_PWM_PIN);  // Params: sleep(enable) pin, direction pin, pwm pin
       rightMotor.begin(MOTOR_R_SLP_PIN,MOTOR_R_DIR_PIN,MOTOR_R_PWM_PIN); // Params: sleep(enable) pin, direction pin, pwm pin
+
+      // Initialize morse object
+      this->morse = new Morse(buzzerPin, morseLedPin);
+
+      // Initialize IMU
+      this->imu = new IMU(&serialBus);
     }
 
 
