@@ -48,10 +48,12 @@ void setup() {
   Serial.print("\tAy = " + String(arr[1]) + "g");
   Serial.print("\tAz = " + String(arr[2]) + "g\n");
 
-  robot->imu->getGyros(arr);
-  Serial.print("Gx = " + String(arr[0]) + " deg/s");
-  Serial.print("\tGy = " + String(arr[1]) + " deg/s");
-  Serial.print("\tGz = " + String(arr[2]) + " deg/s\n");
+  double pr_arr[2];
+  robot->imu->getPitchRoll(pr_arr);
+
+  Serial.print("\n\nPitch = " + String(pr_arr[0]) + " deg");
+  Serial.print("\tRoll = " + String(pr_arr[1]) + " deg");
+  
 
   delay(1000);
 }
