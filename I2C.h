@@ -19,9 +19,9 @@ class I2C {
   }
 
     //  Read byte from the device at a given register address
-    uint8_t readByte(uint16_t memAddr, uint8_t reg)
+    int8_t readByte(uint16_t memAddr, uint8_t reg)
     {
-      uint8_t regByte;  //  Value of byte read from register
+      int8_t regByte;  //  Value of byte read from register
     
       // Open I2C communication with device
       Wire.beginTransmission(memAddr);
@@ -48,7 +48,7 @@ class I2C {
     uint8_t readBit(uint16_t memAddr, uint8_t regAddr, uint8_t bitPos)
     {
       // Read whole byte from the register
-      uint8_t regByte = readByte(memAddr, regAddr);
+      int8_t regByte = readByte(memAddr, regAddr);
     
       /*
        * Select the bit by ANDing(clearing) the whole byte
