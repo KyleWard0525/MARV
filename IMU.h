@@ -202,7 +202,7 @@ class IMU {
 
       // Compute pitch and roll
       double roll = (atan2(Fx, sqrt(Fy*Fy+Fz*Fz)) * 180.0) / M_PI;
-      double pitch = (atan2(-Fy, Fz) * 180.0) / M_PI;
+      double pitch = -(atan2(-Fy, Fz) * 180.0) / M_PI;
       
       retArr[0] = pitch;
       retArr[1] = roll;
