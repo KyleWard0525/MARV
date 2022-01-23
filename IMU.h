@@ -159,14 +159,17 @@ class IMU {
       int16_t GyRaw = (serialBus->readByte(mpuAddr, GyHighAddr) << 8) + serialBus->readByte(mpuAddr, GyLowAddr);  //  Read raw y acceleration
       int16_t GzRaw = (serialBus->readByte(mpuAddr, GzHighAddr) << 8) + serialBus->readByte(mpuAddr, GzLowAddr);  //  Read raw z acceleration
 
-
+      // Apply a low pass filter to the signals to remove excess noise
+      double filtForces[3] = {GxRaw, GyRaw, GzRaw};
+      lowPassFilter(filtForces, 0.1);
+      
       /*
        * According to the datasheet (https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf),
        * to convert from LSB -> deg/s at a range of +-1000 deg/s. We must divide the raw values by 32.8
        */
-       double Gx = GxRaw / 65.5;
-       double Gy = GyRaw / 65.5;
-       double Gz = GzRaw / 65.5;
+       double Gx = filtForces[0] / 65.5;
+       double Gy = filtForces[1] / 65.5;
+       double Gz = filtForces[2] / 65.5;
 
        retArr[0] = Gx;
        retArr[1] = Gy;
@@ -182,6 +185,29 @@ class IMU {
 
       return gyroRate / (1 + sampleRateDiv);
     }
+
+
+    // Get current pitch and roll
+    void getPitchRoll(double* retArr)
+    {
+      // Compute current acceleration vector
+      double accels[3];
+      getAccels(accels);
+
+      // Apply low-pass filter to X and Y. Filter lowest 10%
+      double alpha = 0.9;  //  Save highest 90% of the signal
+      double Fx = accels[0] * alpha + (0 * (1.0 - alpha));
+      double Fy = accels[1] * alpha + (0 * (1.0 - alpha));
+      double Fz = accels[2] * alpha + (0 * (1.0 - alpha));
+
+      // Compute pitch and roll
+      double roll = (atan2(Fx, sqrt(Fy*Fy+Fz*Fz)) * 180.0) / M_PI;
+      double pitch = (atan2(-Fy, Fz) * 180.0) / M_PI;
+      
+      retArr[0] = pitch;
+      retArr[1] = roll;
+    }
+
 
     /*
        Print MPU configuration settings
@@ -226,6 +252,8 @@ class IMU {
 
       Serial.println();
     }
+
+    
 };
 
 
