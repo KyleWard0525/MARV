@@ -38,24 +38,25 @@ void setup() {
   
   // Set buzzer pin as output
   pinMode (buzzerPin, OUTPUT );
-  pinMode(imuSda, INPUT);
-  pinMode(imuScl, INPUT);
   
   robot = new Marv(buzzerPin, morseLed);
 
-  Serial.print("\nMPU sampling rate from imu: ");
-  Serial.print(robot->imu->getSamplingRate());
-
   double arr[3];
-  robot->imu->getAccel(arr);
-
-  Serial.print("\n\nAx = " + String(arr[0]) + "g");
-  Serial.print("\tAy = " + String(arr[1]) + "g");
-  Serial.print("\tAz = " + String(arr[2]) + "g");
   
+  robot->imu->getAccels(arr);
+  Serial.print("\nAx = " + String(arr[0]) + "g");
+  Serial.print("\tAy = " + String(arr[1]) + "g");
+  Serial.print("\tAz = " + String(arr[2]) + "g\n");
+
+  robot->imu->getGyros(arr);
+  Serial.print("Gx = " + String(arr[0]) + " deg/s");
+  Serial.print("\tGy = " + String(arr[1]) + " deg/s");
+  Serial.print("\tGz = " + String(arr[2]) + " deg/s\n");
+
+  delay(1000);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly: 
+  
   robot->checkBumpers(); 
 }
