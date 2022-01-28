@@ -17,13 +17,14 @@
 #include "I2C.h"
 #include "IMU.h"
 #include "Morse.h"
+#include "Ultrasonic.h"
 
 // Main class for controlling the robot
 class Marv {
 
   private:
-    int buzzerPin;
-    int morseLedPin;
+    uint16_t buzzerPin;                   //  GPIO pin for buzzer
+    uint16_t morseLedPin;                 //  GPIO pin for onboard LED used for communicating in morse code
 
     Bumpers bumpSensors;                  //  Interface for the bump sensors
     Romi_Motor_Power leftMotor;           //  For controlling left wheel
@@ -34,11 +35,12 @@ class Marv {
     I2C serialBus;                        //  Reading and writing data of I2C channels
     IMU* imu;                             //  Measuring acceleration and gyro forces
     Morse* morse;                         //  Communcation with the outside world through Morse code
+    UltrasonicSensor* sonicSensor;        //  For measuring distance using ultrasound
     
     //  Main constructor
-    Marv(int buzzPin, int morsePin)
+    Marv(uint16_t buzzPin, uint16_t morsePin, uint16_t tPin, uint16_t ePin)
     { 
-      // Set pins
+      // Set peripheral pins
       buzzerPin = buzzPin;
       morseLedPin = morsePin;
 
@@ -51,6 +53,10 @@ class Marv {
 
       // Initialize IMU
       this->imu = new IMU(&serialBus);
+
+      // Initialize ultrasonic sensor
+      this->sonicSensor = new UltrasonicSensor(ePin, tPin);
+      
     }
 
 
