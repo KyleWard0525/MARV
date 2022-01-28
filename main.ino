@@ -10,18 +10,28 @@
 #include "I2C.h"
 #include "IMU.h"
 
-int buzzerPin = 2;      //  GPIO pin for the buzzer
-int imuSda = 3;         //  Serial data port for the imu
-int imuScl = 23;        //  Serial clock for imu
-int morseLed = 41;      //  LED pin for blinking messages alongside the audible beeps from the buzzer
+uint16_t buzzerPin = 2;       //  GPIO pin for the buzzer
+uint16_t imuSda = 3;          //  Serial data port for the imu
+uint16_t imuScl = 23;         //  Serial clock for imu
+uint16_t morseLed = 41;       //  LED pin for blinking messages alongside the audible beeps from the buzzer
+uint16_t trigPin = 38;         //  Trigger pin for ultrasonic sensor (signal out)
+uint16_t echoPin = 37;         //  Echo pin for ultrasonic signal    (signal in)
 
 Marv* robot;
 
 void setup() {  
   // Setup serial output
   Serial.begin(9600);
-  delay(750);
 
+  // Wait for serial connection to open
+  while(!Serial)
+  {
+    // Do nothing
+    ;
+  }
+
+  Serial.println("Serial ready!");
+  
   // Set bumper pins as inputs
   pinMode(BP_SW_PIN_0, INPUT_PULLUP);
   pinMode(BP_SW_PIN_1, INPUT_PULLUP);
@@ -37,10 +47,14 @@ void setup() {
   pinMode(morseLed, OUTPUT);
   
   // Set buzzer pin as output
-  pinMode (buzzerPin, OUTPUT );
-  
-  robot = new Marv(buzzerPin, morseLed);
+  pinMode(buzzerPin, OUTPUT );
 
+  // Setup ultrasonic sensor pins
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  robot = new Marv(buzzerPin, morseLed, trigPin, echoPin);
+  
   double arr[3];
   
   robot->imu->getAccels(arr);
@@ -51,14 +65,16 @@ void setup() {
   double pr_arr[2];
   robot->imu->getPitchRoll(pr_arr);
 
-  Serial.print("\n\nPitch = " + String(pr_arr[0]) + " deg");
-  Serial.print("\tRoll = " + String(pr_arr[1]) + " deg");
-  
+  Serial.print("\n\nPitch = " + String(pr_arr[0]) + " deg ");
+  Serial.print("\tRoll = " + String(pr_arr[1]) + " deg");;
+
+  Serial.println("\nDistance: " + String(robot->sonicSensor->measure()) + "cm");
 
   delay(1000);
 }
 
 void loop() {
   
-  robot->checkBumpers(); 
+  //robot->sonicSensor->measure(); 
+  robot->checkBumpers();
 }
