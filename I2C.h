@@ -66,6 +66,13 @@ class I2C {
       }
    }
 
+
+  //  Read bit at the given index in the given byte
+  uint8_t readBit(uint8_t dataByte, uint8_t bitPos)
+  {
+    return (dataByte & (1 << bitPos));
+  }
+
    // Write byte to given device register
    bool writeByte(uint16_t memAddr, uint8_t regAddr, uint8_t dataByte)
    {
