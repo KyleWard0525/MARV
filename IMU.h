@@ -23,13 +23,13 @@ class IMU {
     const uint16_t AzHighAddr = 0x3f;   //  I2C address of Z-acceleration's high byte
     const uint16_t AzLowAddr = 0x40;    //  I2C address of Z-acceleration's low byte
     const uint16_t GxHighAddr = 0x43;   //  I2C address of X-gyro's high byte
-    const uint16_t GxLowAddr = 0x44;   //  I2C address of X-gyro's low byte
+    const uint16_t GxLowAddr = 0x44;    //  I2C address of X-gyro's low byte
     const uint16_t GyHighAddr = 0x45;   //  I2C address of Y-gyro's high byte
     const uint16_t GyLowAddr = 0x46;    //  I2C address of Y-gyro's low byte
     const uint16_t GzHighAddr = 0x47;   //  I2C address of Z-gyro's high byte
     const uint16_t GzLowAddr = 0x48;    //  I2C address of Z-gyro's low byte
     const uint16_t whoAmIAddr = 0x75;   //  I2C address for MPU's identifier (READ ONLY REGISTER)
-    const uint16_t aConfigAddr = 0x1C;  //  I2C address for acceleration tolerace config register
+    const uint16_t aConfigAddr = 0x1c;  //  I2C address for acceleration tolerace config register
     const uint16_t gConfigAddr = 0x1B;  //  I2C address for gyro tolerace config register
     const uint16_t srDivAddr = 0x19;    //  I2C address for the sample rate divider register
     uint8_t gyroConfig;                 //  Gyrometer configuration data byte
@@ -96,7 +96,7 @@ class IMU {
         // Write gyroConfig to gyro config register
         if (serialBus->writeByte(mpuAddr, gConfigAddr, gyroConfig))
         {
-          Serial.println("Gyrometer has been reconfigured!");
+          Serial.println("Gyrometer configured.");
         }
       }
 
@@ -105,7 +105,7 @@ class IMU {
         // Write gyroConfig to gyro config register
         if (serialBus->writeByte(mpuAddr, aConfigAddr, accelConfig))
         {
-          Serial.println("Accelerometer has been reconfigured!");
+          Serial.println("Accelerometer configured.");
         }
       }
 
@@ -201,8 +201,8 @@ class IMU {
       double Fz = accels[2] * alpha + (0 * (1.0 - alpha));
 
       // Compute pitch and roll
+      double pitch = (atan2(Fy, Fz) * 180.0) / M_PI;
       double roll = (atan2(Fx, sqrt(Fy*Fy+Fz*Fz)) * 180.0) / M_PI;
-      double pitch = -(atan2(-Fy, Fz) * 180.0) / M_PI;
       
       retArr[0] = pitch;
       retArr[1] = roll;
@@ -212,8 +212,10 @@ class IMU {
     /*
        Print MPU configuration settings
 
-       Credit: MissionCritical (Instructables)
+       Original author: MissionCritical (Instructables)
        https://www.instructables.com/MPU-6050-Tutorial-How-to-Program-MPU-6050-With-Ard/
+
+       Modified by: kward
     */
     void getSettings()
     {
@@ -243,6 +245,48 @@ class IMU {
         case MPU6050_SCALE_250DPS:         Serial.println("250 dps"); break;
       }
 
+      // Read accel config register
+      uint8_t aConfigByte = serialBus->readByte(mpuAddr, aConfigAddr);
+      uint8_t afsBits[2] = {serialBus->readBit(aConfigByte, 4), serialBus->readBit(aConfigByte, 3)};
+      uint8_t afsSel = 0;
+      uint8_t accelRange = 0;
+
+      // Compute acceleration range in G from config bits
+      if(afsBits[0])
+      {
+        afsSel += afsBits[0] / pow(2, 4);
+      }
+      if(afsBits[1])
+      {
+        afsSel += afsBits[1] / pow(2, 3);
+      }
+
+      // Check AFS_SEL value and map it to its corresponding G value
+      switch(afsSel) {
+
+        // +- 2g
+        case 0:
+          accelRange = 2;
+          break;
+
+        // +- 4g
+        case 1: 
+          accelRange = 4;
+          break;
+
+       // +- 8g
+       case 2:
+        accelRange = 8;
+        break;
+
+      // +- 16g
+      case 3:
+       accelRange = 16;
+       break;
+      }
+      Serial.println(" * Accelerometer range: +- " + String(accelRange) + "g");
+      
+      
       Serial.print(" * Gyroscope offsets: ");
       Serial.print(mpu->getGyroOffsetX());
       Serial.print(" / ");
