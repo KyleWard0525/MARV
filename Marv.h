@@ -32,6 +32,17 @@ class Marv {
     
     
   public:
+
+    // Enumerator for MARV's emotional state
+    enum EMOTIONAL_STATE {
+      Idle,             //  Main state, occurs when marv is not doing anything
+      Afraid,           //  Someone too close, marv stuck(long period), other
+      Angry,            //  Someone way too close, marv stuck(short period), continuously bumping, other
+      Bored,            //  Idle for long period of time
+      Curious           //  'Go' mode. When marv wants to travel around and explore
+    } feeling;
+
+  
     I2C serialBus;                        //  Reading and writing data of I2C channels
     IMU* imu;                             //  Measuring acceleration and gyro forces
     Morse* morse;                         //  Communcation with the outside world through Morse code
@@ -47,6 +58,9 @@ class Marv {
       // Initialize motors
       leftMotor.begin(MOTOR_L_SLP_PIN,MOTOR_L_DIR_PIN,MOTOR_L_PWM_PIN);  // Params: sleep(enable) pin, direction pin, pwm pin
       rightMotor.begin(MOTOR_R_SLP_PIN,MOTOR_R_DIR_PIN,MOTOR_R_PWM_PIN); // Params: sleep(enable) pin, direction pin, pwm pin
+
+      // Set MARV's initial internal states
+      this->feeling = Idle;
 
       // Initialize morse object
       this->morse = new Morse(buzzerPin, morseLedPin);
@@ -88,6 +102,13 @@ class Marv {
       }
     }
 
+    // Check distance to objects in front of marv and attempt to handle various situations
+    void monitorForwardSensor()
+    {
+      // Check distance to nearest object
+      
+    }
+
 
     // Move forward at a given speed for a given time (in seconds)
     void forward(int speed, float duration)
@@ -115,6 +136,7 @@ class Marv {
         // Sleep for 5ms
         delay(1);
       }
+      
       leftMotor.disableMotor();
       rightMotor.disableMotor();
     }
@@ -158,8 +180,16 @@ class Marv {
       leftMotor.setSpeed(speed);
       rightMotor.setSpeed(speed);
 
-      // Delay then turn of motors
-      delay(duration_ms);
+      // Loop through duration_ms where i is 1ms
+      for(int i = 0; i < duration_ms; i++)
+      {
+        // Check if robot bumps into something
+        checkBumpers();
+
+        // Sleep for 5ms
+        delay(1);
+      }
+      
       leftMotor.disableMotor();
       rightMotor.disableMotor();
     }
@@ -180,8 +210,16 @@ class Marv {
       leftMotor.setSpeed(speed);
       rightMotor.setSpeed(speed);
 
-      // Delay then turn of motors
-      delay(duration_ms);
+      // Loop through duration_ms where i is 1ms
+      for(int i = 0; i < duration_ms; i++)
+      {
+        // Check if robot bumps into something
+        checkBumpers();
+
+        // Sleep for 5ms
+        delay(1);
+      }
+      
       leftMotor.disableMotor();
       rightMotor.disableMotor();
     }
