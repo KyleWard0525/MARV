@@ -14,24 +14,24 @@
 class IMU {
 
   private:
-    const uint16_t mpuAddr = 0x68;      //  I2C address for communicating with the MPU-6050 (0x69 if A0 is HIGH)
-    const uint16_t slpAddr = 0x6b;      //  I2C address of MPU's power/sleep register
-    const uint16_t AxHighAddr = 0x3b;   //  I2C address of X-acceleration's high byte
-    const uint16_t AxLowAddr = 0x3c;    //  I2C address of X-accelertation's low byte
-    const uint16_t AyHighAddr = 0x3d;   //  I2C address of Y-acceleration's high byte
-    const uint16_t AyLowAddr = 0x3e;    //  I2C address of Y-acceleration's low byte
-    const uint16_t AzHighAddr = 0x3f;   //  I2C address of Z-acceleration's high byte
-    const uint16_t AzLowAddr = 0x40;    //  I2C address of Z-acceleration's low byte
-    const uint16_t GxHighAddr = 0x43;   //  I2C address of X-gyro's high byte
-    const uint16_t GxLowAddr = 0x44;    //  I2C address of X-gyro's low byte
-    const uint16_t GyHighAddr = 0x45;   //  I2C address of Y-gyro's high byte
-    const uint16_t GyLowAddr = 0x46;    //  I2C address of Y-gyro's low byte
-    const uint16_t GzHighAddr = 0x47;   //  I2C address of Z-gyro's high byte
-    const uint16_t GzLowAddr = 0x48;    //  I2C address of Z-gyro's low byte
-    const uint16_t whoAmIAddr = 0x75;   //  I2C address for MPU's identifier (READ ONLY REGISTER)
-    const uint16_t aConfigAddr = 0x1c;  //  I2C address for acceleration tolerace config register
-    const uint16_t gConfigAddr = 0x1B;  //  I2C address for gyro tolerace config register
-    const uint16_t srDivAddr = 0x19;    //  I2C address for the sample rate divider register
+    const byte mpuAddr = 0x68;      //  I2C address for communicating with the MPU-6050 (0x69 if A0 is HIGH)
+    const byte slpAddr = 0x6b;      //  I2C address of MPU's power/sleep register
+    const byte AxHighAddr = 0x3b;   //  I2C address of X-acceleration's high byte
+    const byte AxLowAddr = 0x3c;    //  I2C address of X-accelertation's low byte
+    const byte AyHighAddr = 0x3d;   //  I2C address of Y-acceleration's high byte
+    const byte AyLowAddr = 0x3e;    //  I2C address of Y-acceleration's low byte
+    const byte AzHighAddr = 0x3f;   //  I2C address of Z-acceleration's high byte
+    const byte AzLowAddr = 0x40;    //  I2C address of Z-acceleration's low byte
+    const byte GxHighAddr = 0x43;   //  I2C address of X-gyro's high byte
+    const byte GxLowAddr = 0x44;    //  I2C address of X-gyro's low byte
+    const byte GyHighAddr = 0x45;   //  I2C address of Y-gyro's high byte
+    const byte GyLowAddr = 0x46;    //  I2C address of Y-gyro's low byte
+    const byte GzHighAddr = 0x47;   //  I2C address of Z-gyro's high byte
+    const byte GzLowAddr = 0x48;    //  I2C address of Z-gyro's low byte
+    const byte whoAmIAddr = 0x75;   //  I2C address for MPU's identifier (READ ONLY REGISTER)
+    const byte aConfigAddr = 0x1c;  //  I2C address for acceleration tolerace config register
+    const byte gConfigAddr = 0x1B;  //  I2C address for gyro tolerace config register
+    const byte srDivAddr = 0x19;    //  I2C address for the sample rate divider register
     uint8_t gyroConfig;                 //  Gyrometer configuration data byte
     uint8_t accelConfig;                //  Acceleration configuration data byte
     I2C* serialBus;                     //  Interface for communicating with device through I2C
