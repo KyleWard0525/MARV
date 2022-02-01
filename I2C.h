@@ -43,6 +43,23 @@ class I2C {
     
       return regByte;
     }
+
+    //  Read byte from the given I2C address
+    int8_t readByte(uint16_t  memAddr)
+    {
+      int8_t regByte;  //  Value of byte read from register
+    
+      // Open another comm channel with device and read only the selected register
+      Wire.beginTransmission(memAddr);
+      
+      Wire.requestFrom(memAddr, 1);  //  Tell device to only read the first byte
+    
+      // Read byte and end transmission
+      regByte = Wire.read();
+      Wire.endTransmission();
+    
+      return regByte;
+    }
     
     //  Read bit value from device register at given position
     uint8_t readBit(uint16_t memAddr, uint8_t regAddr, uint8_t bitPos)
@@ -88,8 +105,34 @@ class I2C {
       // End communication
       Wire.endTransmission();
 
+      delay(1);
+
       // Ensure write operation was successful
       if(readByte(memAddr, regAddr) == dataByte)
+      {
+        return true;
+      }
+      else {
+        return false;
+      }
+   }
+
+   // Write byte to given device register
+   bool writeByte(uint16_t memAddr, uint8_t dataByte)
+   {
+    // Open I2C communication with device
+      Wire.beginTransmission(memAddr);
+
+      // Write byte to register
+      Wire.write(dataByte);
+
+      // End communication
+      Wire.endTransmission();
+
+      delay(1);
+
+      // Ensure write operation was successful
+      if(readByte(memAddr) == dataByte)
       {
         return true;
       }
