@@ -90,7 +90,7 @@ class Marv {
           // Check if anyone has helped marv in the alloted time
           if(millis() - start >= 250)
           {
-            reverse(10, 1);
+            reverse(20, 1);
           }
         }
         
