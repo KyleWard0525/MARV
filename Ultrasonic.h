@@ -35,8 +35,7 @@ class UltrasonicSensor {
      digitalWrite(trigPin, LOW);
 
      // Read the amoount of time taken in microseconds for echo pin to recieve a signal
-     unsigned long duration = pulseIn(echoPin, HIGH, 38000);
-     
+     long duration = pulseIn(echoPin, HIGH, 38000);
  
      /*
       * In order to convert the time taken into cm, we must divide the result
