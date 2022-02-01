@@ -4,11 +4,11 @@
  * 
  * kward
  */
-
 #include "Marv.h"
 #include "Morse.h"
 #include "I2C.h"
 #include "IMU.h"
+#include "LCD.h"
 
 uint16_t buzzerPin = 2;       //  GPIO pin for the buzzer
 uint16_t imuSda = 3;          //  Serial data port for the imu
@@ -31,6 +31,7 @@ void setup() {
   }
 
   Serial.println("Serial ready!");
+
   
   // Set bumper pins as inputs
   pinMode(BP_SW_PIN_0, INPUT_PULLUP);
@@ -54,6 +55,9 @@ void setup() {
   pinMode(echoPin, INPUT);
 
   robot = new Marv(buzzerPin, morseLed, trigPin, echoPin);
+
+  LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
+  LCD lcd(&lcdI2C_module);
   
   double arr[3];
   
@@ -68,9 +72,16 @@ void setup() {
   Serial.print("\n\nPitch = " + String(pr_arr[0]) + " deg ");
   Serial.print("\tRoll = " + String(pr_arr[1]) + " deg");;
 
-  Serial.println("\nDistance: " + String(robot->sonicSensor->measure()) + "cm");
-
-  delay(1000);
+  double distance = robot->sonicSensor->measure();
+  Serial.println(distance);
+  // Attempt to enable display, cursor, and blink
+  lcd.on();
+  lcd.screen->setCursor(1,0);
+  lcd.screen->print("Distance: ");
+  lcd.screen->print(distance);
+  delay(10000);
+                                                    
+  lcd.off();
 }
 
 void loop() {
