@@ -14,7 +14,8 @@ class LCD {
   private:
     const uint8_t nRows = 2;                      //  Number of rows in LCD screen
     const uint8_t nCols = 16;                     //  Number of columns in LCD screen
-    const uint8_t deviceAddr = 0x27;                 //  Device address
+    const uint8_t deviceAddr = 0x27;              //  Device address
+    const uint8_t screenPadding = 1;              //  Number of columns of padding on either side
     
   public:
     LiquidCrystal_I2C* screen;                     //  I2C Interface for communicating with LCD I2C module
