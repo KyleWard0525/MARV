@@ -12,12 +12,14 @@
 #include "Energia.h"
 #include "GPIO.h"
 #include "RSLK_Pins.h"
+#include "LiquidCrystal_I2C.h"
 #include "Utils.h"
 #include "Bumpers.h"
 #include "I2C.h"
 #include "IMU.h"
 #include "Morse.h"
 #include "Ultrasonic.h"
+#include "LCD.h"
 
 // Main class for controlling the robot
 class Marv {
@@ -47,6 +49,7 @@ class Marv {
     IMU* imu;                             //  Measuring acceleration and gyro forces
     Morse* morse;                         //  Communcation with the outside world through Morse code
     UltrasonicSensor* sonicSensor;        //  For measuring distance using ultrasound
+    LCD* lcd;                             //  Interface for LCD1602 screen
     
     //  Main constructor
     Marv(uint16_t buzzPin, uint16_t morsePin, uint16_t tPin, uint16_t ePin)
@@ -58,9 +61,14 @@ class Marv {
       // Initialize motors
       leftMotor.begin(MOTOR_L_SLP_PIN,MOTOR_L_DIR_PIN,MOTOR_L_PWM_PIN);  // Params: sleep(enable) pin, direction pin, pwm pin
       rightMotor.begin(MOTOR_R_SLP_PIN,MOTOR_R_DIR_PIN,MOTOR_R_PWM_PIN); // Params: sleep(enable) pin, direction pin, pwm pin
+      
 
       // Set MARV's initial internal states
       this->feeling = Idle;
+
+      // Initialize LCD screen
+      LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
+      this->lcd = new LCD(&lcdI2C_module);
 
       // Initialize morse object
       this->morse = new Morse(buzzerPin, morseLedPin);
