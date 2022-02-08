@@ -15,10 +15,10 @@ class LCD {
     const uint8_t nRows = 2;                      //  Number of rows in LCD screen
     const uint8_t nCols = 16;                     //  Number of columns in LCD screen
     const uint8_t deviceAddr = 0x27;              //  Device address
-    const uint8_t screenPadding = 1;              //  Number of columns of padding on either side
+    const uint8_t screenPadding = 1;              //  Columns of padding on both sides
     
   public:
-    LiquidCrystal_I2C* screen;                     //  I2C Interface for communicating with LCD I2C module
+    LiquidCrystal_I2C* screen;                    //  I2C Interface for communicating with LCD I2C module
 
     LCD(LiquidCrystal_I2C* i2cModule)
     {
@@ -48,7 +48,7 @@ class LCD {
       screen->noBacklight();
       screen->noDisplay();
       screen->noCursor();
-      
+      screen->noBlink();
       
       // Reset to initial state
       resetScreen();
@@ -57,9 +57,11 @@ class LCD {
     //  Reset screen to default state
     void resetScreen()
     {
-      // Clear screen and move cursor back to 0,0
+      // Clear screen and move cursor back to screenPadding,0
       screen->clear();
-      screen->home();
+
+      // Set cursor after padding
+      screen->setCursor(screenPadding,0);
     }
 
     
