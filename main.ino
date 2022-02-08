@@ -48,7 +48,7 @@ void setup() {
   pinMode(morseLed, OUTPUT);
   
   // Set buzzer pin as output
-  pinMode(buzzerPin, OUTPUT );
+  pinMode(buzzerPin, OUTPUT);
 
   // Setup ultrasonic sensor pins
   pinMode(trigPin, OUTPUT);
@@ -56,10 +56,6 @@ void setup() {
 
   robot = new Marv(buzzerPin, morseLed, trigPin, echoPin);
 
-  
-  LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
-  LCD lcd(&lcdI2C_module);
-  
   double arr[3];
   
   robot->imu->getAccels(arr);
@@ -73,16 +69,10 @@ void setup() {
   Serial.print("\n\nPitch = " + String(pr_arr[0]) + " deg ");
   Serial.print("\tRoll = " + String(pr_arr[1]) + " deg");;
 
+  delay(2000);
+
   double distance = robot->sonicSensor->measure();
-  Serial.println(distance);
-  // Attempt to enable display, cursor, and blink
-  lcd.on();
-  lcd.screen->setCursor(1,0);
-  lcd.screen->print("Distance: ");
-  lcd.screen->print(distance);
-  delay(10000);
-                                                    
-  lcd.off();
+  Serial.println("\nDistance measured: " + String(distance));
 }
 
 void loop() {
