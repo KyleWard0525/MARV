@@ -22,7 +22,7 @@ class UltrasonicSensor {
   }
 
   //  Poll distance to nearest object from the sensor (cm)
-  double measure()
+  long measure()
   {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
