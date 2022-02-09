@@ -19,7 +19,7 @@ class Motors {
     const uint16_t pulsesPerWheelRev = 1440;          //  Pulses per revolution of the wheels
     const uint8_t wheelDiameter = 7;                  //  Wheel diameter in cm
     const uint16_t gearRatio = 120;                   //  120:1 because ratio = (360 / pulses per motor revolution(3)) 
-    float cmPerPulse;                                 //  Centimeters traveled per pulse
+    double cmPerPulse;                                //  Centimeters traveled per pulse
 
     
 
@@ -43,6 +43,41 @@ class Motors {
     }
 
     
+    void forward(double dist_cm, uint16_t speed)
+    {
+      // Compute number of pulses needed
+      int nPulses = floor(dist_cm / cmPerPulse);
+
+      // Reset motor encoder counts
+      resetLeftEncoderCnt();
+      resetRightEncoderCnt();
+
+      // Set motor direction and enable motors
+      leftMotor.directionForward();
+      rightMotor.directionForward();
+      
+      leftMotor.enableMotor();
+      rightMotor.enableMotor();
+
+      // Set motor speed (start moving)
+      leftMotor.setSpeed(speed);
+      rightMotor.setSpeed(speed);
+
+
+     // Wait for motor encoder to read nPulses (distance traveled = dist_cm)
+     while(getEncoderLeftCnt() < nPulses && getEncoderRightCnt() < nPulses)
+     {
+        // Do nothing
+        ;
+     }
+     
+      // Stop motors
+      leftMotor.disableMotor();
+      rightMotor.disableMotor();
+      
+      Serial.println("Pulses needed to travel " + String(dist_cm) + "cm = " + String(nPulses));
+      Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
+    }
 };
 
 
