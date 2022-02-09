@@ -30,7 +30,6 @@ class Marv {
     uint16_t morseLedPin;                 //  GPIO pin for onboard LED used for communicating in morse code
 
     Bumpers bumpSensors;                  //  Interface for the bump sensors
-    Motors motors;                        //  API for precise motor controls
     
     
   public:
@@ -46,6 +45,7 @@ class Marv {
 
   
     I2C serialBus;                        //  Reading and writing data of I2C channels
+    Motors motors;                        //  API for precise motor controls
     IMU* imu;                             //  Measuring acceleration and gyro forces
     Morse* morse;                         //  Communcation with the outside world through Morse code
     UltrasonicSensor* sonicSensor;        //  For measuring distance using ultrasound
