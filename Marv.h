@@ -20,6 +20,7 @@
 #include "Morse.h"
 #include "Ultrasonic.h"
 #include "LCD.h"
+#include "Motors.h"
 
 // Main class for controlling the robot
 class Marv {
@@ -29,8 +30,7 @@ class Marv {
     uint16_t morseLedPin;                 //  GPIO pin for onboard LED used for communicating in morse code
 
     Bumpers bumpSensors;                  //  Interface for the bump sensors
-    Romi_Motor_Power leftMotor;           //  For controlling left wheel
-    Romi_Motor_Power rightMotor;          //  For controlling right wheel
+    Motors motors;                        //  API for precise motor controls
     
     
   public:
@@ -57,10 +57,6 @@ class Marv {
       // Set peripheral pins
       buzzerPin = buzzPin;
       morseLedPin = morsePin;
-
-      // Initialize motors
-      leftMotor.begin(MOTOR_L_SLP_PIN,MOTOR_L_DIR_PIN,MOTOR_L_PWM_PIN);  // Params: sleep(enable) pin, direction pin, pwm pin
-      rightMotor.begin(MOTOR_R_SLP_PIN,MOTOR_R_DIR_PIN,MOTOR_R_PWM_PIN); // Params: sleep(enable) pin, direction pin, pwm pin
       
 
       // Set MARV's initial internal states
@@ -70,15 +66,18 @@ class Marv {
       LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
       this->lcd = new LCD(&lcdI2C_module);
 
+      Serial.println("LCD initialized.");
+
       // Initialize morse object
       this->morse = new Morse(buzzerPin, morseLedPin);
 
       // Initialize IMU
       this->imu = new IMU(&serialBus);
-
+      
       // Initialize ultrasonic sensor
       this->sonicSensor = new UltrasonicSensor(ePin, tPin);
-      
+
+      Serial.println("Ultrasonic sensor initialized.");
     }
 
 
@@ -125,15 +124,15 @@ class Marv {
       int duration_ms = int(duration*1000); 
       
       // Set motor direction and enable motors
-      leftMotor.directionForward();
-      rightMotor.directionForward();
+      motors.leftMotor.directionForward();
+      motors.rightMotor.directionForward();
       
-      leftMotor.enableMotor();
-      rightMotor.enableMotor();
+      motors.leftMotor.enableMotor();
+      motors.rightMotor.enableMotor();
 
       // Set motor speed (start moving)
-      leftMotor.setSpeed(speed);
-      rightMotor.setSpeed(speed);
+      motors.leftMotor.setSpeed(speed);
+      motors.rightMotor.setSpeed(speed);
 
       // Loop through duration_ms where i is 1ms
       for(int i = 0; i < duration_ms; i++)
@@ -145,8 +144,8 @@ class Marv {
         delay(1);
       }
       
-      leftMotor.disableMotor();
-      rightMotor.disableMotor();
+      motors.leftMotor.disableMotor();
+      motors.rightMotor.disableMotor();
     }
 
     // Move forward at a given speed for a given time (in seconds)
@@ -156,20 +155,20 @@ class Marv {
       int duration_ms = int(duration*1000); 
       
       // Set motor direction and enable motors
-      leftMotor.directionBackward();
-      rightMotor.directionBackward();
+      motors.leftMotor.directionBackward();
+      motors.rightMotor.directionBackward();
       
-      leftMotor.enableMotor();
-      rightMotor.enableMotor();
+      motors.leftMotor.enableMotor();
+      motors.rightMotor.enableMotor();
 
       // Set motor speed (start moving)
-      leftMotor.setSpeed(speed);
-      rightMotor.setSpeed(speed);
+      motors.leftMotor.setSpeed(speed);
+      motors.rightMotor.setSpeed(speed);
 
       // Sleep for duration_ms then turn of motors
       delay(duration_ms);
-      leftMotor.disableMotor();
-      rightMotor.disableMotor();
+      motors.leftMotor.disableMotor();
+      motors.rightMotor.disableMotor();
     }
 
     // Turn left at a given speed
@@ -179,14 +178,14 @@ class Marv {
       int duration_ms = int(duration*1000); 
       
       // Set motor directions
-      leftMotor.directionBackward();
-      rightMotor.directionForward();
-      leftMotor.enableMotor();
-      rightMotor.enableMotor();
+      motors.leftMotor.directionBackward();
+      motors.rightMotor.directionForward();
+      motors.leftMotor.enableMotor();
+      motors.rightMotor.enableMotor();
 
       // Set motor speed (start moving)
-      leftMotor.setSpeed(speed);
-      rightMotor.setSpeed(speed);
+      motors.leftMotor.setSpeed(speed);
+      motors.rightMotor.setSpeed(speed);
 
       // Loop through duration_ms where i is 1ms
       for(int i = 0; i < duration_ms; i++)
@@ -198,8 +197,8 @@ class Marv {
         delay(1);
       }
       
-      leftMotor.disableMotor();
-      rightMotor.disableMotor();
+      motors.leftMotor.disableMotor();
+      motors.rightMotor.disableMotor();
     }
 
     // Turn right at a given speed
@@ -209,14 +208,14 @@ class Marv {
       int duration_ms = int(duration*1000); 
       
       // Set motor directions
-      leftMotor.directionForward();
-      rightMotor.directionBackward();
-      leftMotor.enableMotor();
-      rightMotor.enableMotor();
+      motors.leftMotor.directionForward();
+      motors.rightMotor.directionBackward();
+      motors.leftMotor.enableMotor();
+      motors.rightMotor.enableMotor();
 
       // Set motor speed (start moving)
-      leftMotor.setSpeed(speed);
-      rightMotor.setSpeed(speed);
+      motors.leftMotor.setSpeed(speed);
+      motors.rightMotor.setSpeed(speed);
 
       // Loop through duration_ms where i is 1ms
       for(int i = 0; i < duration_ms; i++)
@@ -228,8 +227,8 @@ class Marv {
         delay(1);
       }
       
-      leftMotor.disableMotor();
-      rightMotor.disableMotor();
+      motors.leftMotor.disableMotor();
+      motors.rightMotor.disableMotor();
     }
 };
 
