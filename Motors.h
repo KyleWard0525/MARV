@@ -133,7 +133,7 @@ class Motors {
       *  
       *  nPulses = (pulses per rev * abs(nDeg)) / 360
       */
-      int16_t nPulses = (pulsesPerWheelRev * abs(nDeg)) / 360.0;
+      int16_t nPulses = (pulsesPerWheelRev * abs(nDeg)) / 360.0 / 2;
 
       // Reset motor encoder counts
       resetLeftEncoderCnt();
@@ -155,6 +155,52 @@ class Motors {
         // Set motor speed (start moving)
         leftMotor.setSpeed(defaultSpeed);
         rightMotor.setSpeed(defaultSpeed);
+
+        // Wait for motor encoder to read nPulses
+        while(getEncoderLeftCnt() < nPulses/2 || getEncoderRightCnt() < nPulses)
+        {
+          // Do nothing
+          ;
+        }
+
+        // Stop motors
+        leftMotor.disableMotor();
+        rightMotor.disableMotor();
+        
+        Serial.println("Pulses needed to turn " + String(nDeg) + " degrees = " + String(nPulses));
+        Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
+      }
+      else if(nDeg > 0)
+      {
+        // Set motor directions to turn right
+        leftMotor.directionForward();
+        rightMotor.directionBackward();
+
+        // Enable motors
+        leftMotor.enableMotor();
+        rightMotor.enableMotor();
+
+        // Set motor speed (start moving)
+        leftMotor.setSpeed(defaultSpeed);
+        rightMotor.setSpeed(defaultSpeed);
+
+        // Wait for motor encoder to read nPulses
+        while(getEncoderLeftCnt() < nPulses || getEncoderRightCnt() < nPulses)
+        {
+          if(getEncoderLeftCnt() % (nPulses/2))
+          {
+            leftMotor.setSpeed(defaultSpeed/2);
+            rightMotor.setSpeed(defaultSpeed/2);
+          }
+          delayMicroseconds(200);
+        }
+
+        // Stop motors
+        leftMotor.disableMotor();
+        rightMotor.disableMotor();
+        
+        Serial.println("Pulses needed to turn " + String(nDeg) + " degrees = " + String(nPulses));
+        Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
       }
     }
 };
