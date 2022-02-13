@@ -120,7 +120,7 @@ class IMU {
          Read raw acceleration values from MPU registers.
 
          Both bytes will be left-padded with 8 0s in order to make them
-         into 16-bit numbers (since they're being store into an int16_t).
+         into 16-bit numbers (since they're being stored into an int16_t).
 
          Since we need the high byte to be the most significant byte, we left shift it by 8
          to get rid of the 0s that were padded.
