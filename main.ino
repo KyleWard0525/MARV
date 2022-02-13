@@ -14,8 +14,8 @@ uint16_t buzzerPin = 2;       //  GPIO pin for the buzzer
 uint16_t imuSda = 3;          //  Serial data port for the imu
 uint16_t imuScl = 23;         //  Serial clock for imu
 uint16_t morseLed = 41;       //  LED pin for blinking messages alongside the audible beeps from the buzzer
-uint16_t trigPin = 38;         //  Trigger pin for ultrasonic sensor (signal out)
-uint16_t echoPin = 37;         //  Echo pin for ultrasonic signal    (signal in)
+uint16_t trigPin = 38;        //  Trigger pin for ultrasonic sensor (signal out)
+uint16_t echoPin = 37;        //  Echo pin for ultrasonic signal    (signal in)
 
 Marv* robot;
 
@@ -29,7 +29,8 @@ void setup() {
     // Do nothing
     ;
   }
-
+  delay(1000);
+  
   Serial.println("Serial ready!");
 
   
@@ -69,14 +70,20 @@ void setup() {
   Serial.print("\n\nPitch = " + String(pr_arr[0]) + " deg ");
   Serial.print("\tRoll = " + String(pr_arr[1]) + " deg");;
 
-  delay(2000);
-
   double distance = robot->sonicSensor->measure();
   Serial.println("\nDistance measured: " + String(distance));
+
+  //robot->motors.forward(3);
+  robot->motors.turn(90);
+  
+  delay(1000);
 }
 
 void loop() {
+
+//  double distance = robot->sonicSensor->measure();
+//  Serial.println("\nDistance measured: " + String(distance));
+//  delay(1000);
   
-  //robot->sonicSensor->measure(); 
   robot->checkBumpers();
 }
