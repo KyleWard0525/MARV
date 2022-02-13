@@ -25,7 +25,7 @@ class UltrasonicSensor {
   long measure()
   {
     digitalWrite(trigPin, LOW);
-    delayMicroseconds(2);
+    delayMicroseconds(5);
     /*
      * Set the trigger pin to high for 10 microseconds as the trigger pin
      * is only activated when a 10 microsecond pulse is applied
