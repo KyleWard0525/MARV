@@ -11,13 +11,14 @@
 #include "RSLK_Pins.h"
 #include "Encoder.h"
 #include "Romi_Motor_Power.h"
+#include "Bumpers.h"
 
 class Motors {
 
   private:
     const uint16_t pulsesPerMotorRev = 3;             //  Pulses per revolution of the motor shaft
     const uint16_t pulsesPerWheelRev = 1440;          //  Pulses per revolution of the wheels
-    const uint8_t wheelDiameter = 6;                  //  Wheel diameter in cm
+    const uint8_t wheelDiameter = 7;                  //  Wheel diameter in cm
     const uint16_t gearRatio = 120;                   //  120:1 because ratio = (360 / pulses per motor revolution(3)) 
     uint16_t defaultSpeed = 50;                       //  Default speed (for now)
     double cmPerPulse;                                //  Centimeters traveled per pulse
@@ -26,6 +27,7 @@ class Motors {
   public:
     Romi_Motor_Power leftMotor;                       //  For controlling left wheel
     Romi_Motor_Power rightMotor;                      //  For controlling right wheel
+    Bumpers bumpSensors;                              //  Bump sensor interface
 
     Motors() 
     {
@@ -68,12 +70,13 @@ class Motors {
      while(getEncoderLeftCnt() < nPulses && getEncoderRightCnt() < nPulses)
      {
         // Do nothing
-        ;
+        delay(1);
      }
      
       // Stop motors
-      leftMotor.disableMotor();
       rightMotor.disableMotor();
+      leftMotor.disableMotor();
+      
       
       Serial.println("Pulses needed to travel " + String(dist_cm) + "cm = " + String(nPulses));
       Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
@@ -104,7 +107,7 @@ class Motors {
      while(getEncoderLeftCnt() < nPulses && getEncoderRightCnt() < nPulses)
      {
         // Do nothing
-        ;
+        delay(1);
      }
      
       // Stop motors
@@ -160,7 +163,7 @@ class Motors {
         while(getEncoderLeftCnt() < nPulses/2 || getEncoderRightCnt() < nPulses)
         {
           // Do nothing
-          ;
+          delay(1);
         }
 
         // Stop motors
