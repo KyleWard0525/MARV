@@ -45,7 +45,7 @@ class Marv {
 
   
     I2C serialBus;                        //  Reading and writing data of I2C channels
-    Motors motors;                       //  API for precise motor controls
+    Motors motors;                        //  API for precise motor controls
     IMU* imu;                             //  Measuring acceleration and gyro forces
     Morse* morse;                         //  Communcation with the outside world through Morse code
     UltrasonicSensor* sonicSensor;        //  For measuring distance using ultrasound
@@ -60,24 +60,22 @@ class Marv {
       
 
       // Set MARV's initial internal states
-      this->feeling = Idle;
+      feeling = Idle;
 
       // Initialize LCD screen
       LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
-      this->lcd = new LCD(&lcdI2C_module);
-
-      // Check if LCD was initialize successfully by trying to read from i2c addr
-      //Serial.println("LCD initialized.");
+      lcd = new LCD(&lcdI2C_module);
       
-
+      lcd->showMessage("Booting...", 2500);
+      
       // Initialize morse object
-      this->morse = new Morse(buzzerPin, morseLedPin);
+      morse = new Morse(buzzerPin, morseLedPin);
 
       // Initialize IMU
-      this->imu = new IMU(&serialBus);
+      imu = new IMU(&serialBus);
       
       // Initialize ultrasonic sensor
-      this->sonicSensor = new UltrasonicSensor(ePin, tPin);
+      sonicSensor = new UltrasonicSensor(ePin, tPin);
 
       Serial.println("Ultrasonic sensor initialized.");
     }
