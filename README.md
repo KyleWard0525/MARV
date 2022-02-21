@@ -2,21 +2,28 @@
 MARV is being designed and built as a way for me to gain an introdcution to robotics and hopefully make a little robot friend.
 
 ## Hardware
-As of v0.0.1 (1/21/2022), MARV uses the following hardware:
+As of v0.0.2, MARV uses the following hardware:
 - TI RSLK-MAX Robotics kit
 - TI MSP432P401R LaunchPad Development board (Arduino)
 - MPU-6050 Inertial Measurement Unit
 - 6 Forward-Facing Bump Sensors
-- 2 DRV8838 Motor Drivers for the 2 DC Motors
+- 2 DRV8838 Motor Drivers for the 2 DC Motors (with Romi encoders)
 - Active Buzzer
 - Dual-Nonfunctional Googly Optical Recognition Sensors
+- LCD-1602A Display
+- HC-SR04 Ultrasonic Sensor
 
 ## Software
 All of the software is being written in C/C++ using the Energia IDE
 
 ## Features
-![MARV v0.0.1](images/MARV0.0.1.jpg)
-***MARV v0.0.1 shown above***
+
+***Note:*** These "versions" are not full updates/releases. They are small incremental updates
+that may still include bugs or unfinished components.
+
+![MARV v0.0.2](images/Marv002_side.jpg)
+***MARV v0.0.2 shown above***
+
 
 ### v0.0.2:
 - Added LCD1602A LCD Screen
@@ -26,6 +33,9 @@ All of the software is being written in C/C++ using the Energia IDE
 - (Ultrasonic sensor) ***NEEDS TO BE FIXED***
 - Added collision detection when turning right or left ***NEED TO FIX IN NEW REFACTOR***
 
+
+![MARV v0.0.1](images/MARV0.0.1.jpg)
+***MARV v0.0.1 shown above***
 
 ### v0.0.1:
 - Forward collision detection
