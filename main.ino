@@ -16,8 +16,34 @@ uint16_t imuScl = 23;         //  Serial clock for imu
 uint16_t morseLed = 41;       //  LED pin for blinking messages alongside the audible beeps from the buzzer
 uint16_t trigPin = 38;        //  Trigger pin for ultrasonic sensor (signal out)
 uint16_t echoPin = 37;        //  Echo pin for ultrasonic signal    (signal in)
+uint16_t startPin = 74;       //  Button 2
 
 Marv* robot;
+
+
+// For testing new functionality
+void test()
+{
+  double arr[3];
+  
+  robot->imu->getAccels(arr);
+  Serial.print("\nAx = " + String(arr[0]) + "g");
+  Serial.print("\tAy = " + String(arr[1]) + "g");
+  Serial.print("\tAz = " + String(arr[2]) + "g\n");
+
+  double pr_arr[2];
+  robot->imu->getPitchRoll(pr_arr);
+
+  Serial.print("\n\nPitch = " + String(pr_arr[0]) + " deg ");
+  Serial.print("\tRoll = " + String(pr_arr[1]) + " deg");;
+
+  double distance = robot->sonicSensor->measure();
+  Serial.println("\nDistance measured: " + String(distance));
+
+  free(arr);
+  free(pr_arr);
+  //robot->motors.forward(7);
+}
 
 void setup() {  
   // Setup serial output
@@ -32,6 +58,9 @@ void setup() {
   delay(1000);
   
   Serial.println("Serial ready!");
+
+
+  pinMode(startPin, INPUT_PULLUP);
 
   
   // Set bumper pins as inputs
@@ -56,34 +85,14 @@ void setup() {
   pinMode(echoPin, INPUT);
 
   robot = new Marv(buzzerPin, morseLed, trigPin, echoPin);
-
-  double arr[3];
   
-  robot->imu->getAccels(arr);
-  Serial.print("\nAx = " + String(arr[0]) + "g");
-  Serial.print("\tAy = " + String(arr[1]) + "g");
-  Serial.print("\tAz = " + String(arr[2]) + "g\n");
-
-  double pr_arr[2];
-  robot->imu->getPitchRoll(pr_arr);
-
-  Serial.print("\n\nPitch = " + String(pr_arr[0]) + " deg ");
-  Serial.print("\tRoll = " + String(pr_arr[1]) + " deg");;
-
-  double distance = robot->sonicSensor->measure();
-  Serial.println("\nDistance measured: " + String(distance));
-
-  //robot->motors.forward(3);
-  robot->motors.turn(90);
+  robot->morse->i(); 
   
-  delay(1000);
+  Serial.println("\n\nEnd setup()\n");
 }
 
 void loop() {
 
-//  double distance = robot->sonicSensor->measure();
-//  Serial.println("\nDistance measured: " + String(distance));
-//  delay(1000);
-  
   robot->checkBumpers();
+  
 }
