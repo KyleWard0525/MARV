@@ -18,7 +18,7 @@ All of the software is being written in C/C++ using the Energia IDE
 ![MARV v0.0.1](images/MARV0.0.1.jpg)
 ***MARV v0.0.1 shown above***
 
-### v0.0.2 (WIP):
+### v0.0.2:
 - Added LCD1602A LCD Screen
 - Added I2C interface for read/write operations to device registers
 - Started implementing LCD API
