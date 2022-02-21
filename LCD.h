@@ -15,9 +15,10 @@ class LCD {
     const uint8_t nRows = 2;                      //  Number of rows in LCD screen
     const uint8_t nCols = 16;                     //  Number of columns in LCD screen
     const uint8_t deviceAddr = 0x27;              //  Device address
-    const uint8_t screenPadding = 1;              //  Columns of padding on both sides
+    
     
   public:
+    const uint8_t screenPadding = 1;              //  Columns of padding on both sides
     LiquidCrystal_I2C* screen;                    //  I2C Interface for communicating with LCD I2C module
 
     LCD(LiquidCrystal_I2C* i2cModule)
@@ -64,7 +65,22 @@ class LCD {
       screen->setCursor(screenPadding,0);
     }
 
-    
+    //  Show message on screen for a specified time (-1 for infinite)
+    void showMessage(const char* message, int dur)
+    {
+      on();
+      screen->blink();
+      screen->print(message);
+
+      if(dur == -1)
+      {
+        return;
+      }
+      else {
+        delay(dur);
+        off();
+      }
+    }
 };
 
 
