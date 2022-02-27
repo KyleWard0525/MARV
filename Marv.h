@@ -32,6 +32,7 @@ class Marv {
   private:
     uint16_t buzzerPin;                   //  GPIO pin for buzzer
     uint16_t morseLedPin;                 //  GPIO pin for onboard LED used for communicating in morse code
+    uint8_t forwardBufferDist;            //  Forward buffer distance in cm
     const float wheelBase = 14;           //  Wheel base in cm
     Bumpers bumpSensors;                  //  Interface for the bump sensors
     
@@ -61,9 +62,6 @@ class Marv {
       // Set peripheral pins
       buzzerPin = buzzPin;
       morseLedPin = morsePin;
-      
-      // Set MARV's initial internal states
-      feeling = Idle;
 
       // Initialize LCD screen
       LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
@@ -86,10 +84,14 @@ class Marv {
       Serial.println("Ultrasonic sensor initialized.");
 
       delay(500);
-      lcd->showMessage(String("Distance: " + String(sonicSensor->measure()) + " cm").c_str(), 5000);
+
+      // Set MARV's initial internal states and variables
+      feeling = Idle;
+      forwardBufferDist = sonicSensor->forwardOffsetDist + 5; // 5cm buffer in front of robot
+
+      // Signal that MARV is ready to go
+      signalReady();
     }
-
-
 
     // Check bumpers for collision and handle response
     void checkBumpers()
@@ -114,11 +116,28 @@ class Marv {
       }
     }
 
+    // Signal that MARV is ready
+    void signalReady()
+    {
+      // Play 'ready' beep
+      morse->i(); 
+
+      // Show message on lcd screen
+      lcd->showMessage("Ready!", 1500, 5, 0);
+    }
+
     // Check distance to objects in front of marv and attempt to handle various situations
     void monitorForwardSensor()
     {
-      // Check distance to nearest object
-      
+      // Measure distance to nearest object
+      long dist = sonicSensor->measure();
+
+      // Check if object is within forward buffer zone
+      if(dist <= forwardBufferDist)
+      {
+        // Reverse away from the object
+        motors->reverse(5);
+      }
     }
 
     void displayPitchRoll()
