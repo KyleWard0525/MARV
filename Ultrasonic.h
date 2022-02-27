@@ -25,7 +25,7 @@ class UltrasonicSensor {
   long measure()
   {
     digitalWrite(trigPin, LOW);
-    delayMicroseconds(5);
+    delayMicroseconds(2);
     /*
      * Set the trigger pin to high for 10 microseconds as the trigger pin
      * is only activated when a 10 microsecond pulse is applied
@@ -35,7 +35,7 @@ class UltrasonicSensor {
      digitalWrite(trigPin, LOW);
 
      // Read the amoount of time taken in microseconds for echo pin to recieve a signal
-     long duration = pulseIn(echoPin, HIGH, 38000);
+     long duration = pulseIn(echoPin, HIGH);
  
      /*
       * In order to convert the time taken into cm, we must divide the result
