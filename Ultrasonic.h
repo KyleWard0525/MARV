@@ -12,6 +12,7 @@ class UltrasonicSensor {
     uint16_t trigPin;
     
  public:
+  const uint8_t forwardOffsetDist = 10;   //  Sensor is ~10cm behind front bumpers
 
   //  Main constructor
   UltrasonicSensor(uint16_t ePin, uint16_t tPin)
