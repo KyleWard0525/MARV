@@ -66,10 +66,11 @@ class LCD {
     }
 
     //  Show message on screen for a specified time (-1 for infinite)
-    void showMessage(const char* message, int dur)
+    void showMessage(const char* message, int dur, int cursorX, int cursorY)
     {
       on();
       screen->blink();
+      screen->setCursor(cursorX, cursorY);
       screen->print(message);
 
       if(dur == -1)
