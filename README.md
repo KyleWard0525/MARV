@@ -30,7 +30,8 @@ that may still include bugs or unfinished components.
 - Added I2C interface for read/write operations to device registers
 - Started implementing LCD API
 - Started implementing Motors API for far more precise and dynamic movement functions
-- (Ultrasonic sensor) ***NEEDS TO BE FIXED***
+- Ultrasonic Sensor
+- Added automatic forward collision avoidance using ultrasonic sensor
 - Added collision detection when turning right or left ***NEED TO FIX IN NEW REFACTOR***
 
 
