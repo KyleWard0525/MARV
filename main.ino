@@ -14,8 +14,8 @@ uint16_t buzzerPin = 2;       //  GPIO pin for the buzzer
 uint16_t imuSda = 3;          //  Serial data port for the imu
 uint16_t imuScl = 23;         //  Serial clock for imu
 uint16_t morseLed = 41;       //  LED pin for blinking messages alongside the audible beeps from the buzzer
-uint16_t trigPin = 38;        //  Trigger pin for ultrasonic sensor (signal out)
-uint16_t echoPin = 37;        //  Echo pin for ultrasonic signal    (signal in)
+uint16_t trigPin = 32;        //  Trigger pin for ultrasonic sensor (signal out)
+uint16_t echoPin = 31;        //  Echo pin for ultrasonic signal    (signal in)
 uint16_t startPin = 74;       //  Button 2
 
 Marv* robot;
@@ -131,10 +131,10 @@ void loop() {
 //    exit(0);
 //  }
 
-  if(digitalRead(startPin) == 0)
-  {
-    driveSquare(30.5*3);
-  }
+//  if(digitalRead(startPin) == 0)
+//  {
+//    driveSquare(30.5*3);
+//  }
 
   robot->checkBumpers();
 
