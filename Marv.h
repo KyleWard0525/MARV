@@ -67,7 +67,7 @@ class Marv {
 
       // Initialize LCD screen
       LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
-      this->lcd = new LCD(&lcdI2C_module);
+      lcd = new LCD(&lcdI2C_module);
       Serial.println("LCD initialized.");
       
       // Initialize morse object
@@ -84,6 +84,9 @@ class Marv {
       // Initialize ultrasonic sensor
       sonicSensor = new UltrasonicSensor(ePin, tPin);
       Serial.println("Ultrasonic sensor initialized.");
+
+      delay(500);
+      lcd->showMessage(String("Distance: " + String(sonicSensor->measure()) + " cm").c_str(), 5000);
     }
 
 
