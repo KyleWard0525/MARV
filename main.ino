@@ -71,10 +71,9 @@ void test()
   Serial.print("\tRoll = " + String(pyr[2]) + " deg\n");
 
   Serial.println("\n\nSampling rate: " + String(robot->imu->getSamplingRate()) + "Hz");
-
+  
   delay(1000);
   
-  //robot->displayPitchRoll();
 }
 
 void setup() {  
@@ -118,8 +117,6 @@ void setup() {
 
   robot = new Marv(buzzerPin, morseLed, trigPin, echoPin);
   
-  robot->morse->i(); 
-
   delay(2000);
   Serial.println("\n\nEnd setup()\n");
 }
@@ -137,13 +134,8 @@ void loop() {
 //  }
 
   robot->checkBumpers();
-
-  // Print accels and gyro readings
-  //Serial.println("Ax = " + String(imuVals[0]) + "\tAy = " + String(imuVals[1]) + "\tAz = " + String(imuVals[2])
-                  //+ "\nGx = " + String(imuVals[3]) + "\tGy = " + String(imuVals[4]) + "\tGz = " + String(imuVals[5]) + "\n");
+  robot->monitorForwardSensor();
   
-  // Print IMU derivatives
-  //Serial.println("\nHeading = " + String(robot->imu->heading) + "deg\tVelocity = " + String(robot->imu->velocity) + " cm/s\tDistance traveled: " + String(robot->imu->distance) + " cm");
   
   delay(200);
 
