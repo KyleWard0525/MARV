@@ -219,7 +219,7 @@ class Motors {
         while(getEncoderLeftCnt() < nPulses || getEncoderRightCnt() < nPulses)
         {
           // Check for bumper collision
-.          checkBumpers();
+          checkBumpers();
           
           imu->poll(imuVals);
           
