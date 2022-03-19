@@ -13,6 +13,20 @@ LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
 // Create a custom type definition for MARV's internal functions
 typedef void (*marv_func_t)();
 
+// Struct for storing peripherial pins
+struct pins_t {
+  uint16_t buzzer;          //  Passive buzzer
+  uint16_t imuSda;          //  Serial data for IMU
+  uint16_t imuClk;          //  Serial clock for IMU
+  uint16_t morseLed;        //  LED for morse code blinks
+  uint16_t frontTrigPin;    //  Trigger pin for front-facing ultrasonic sensor (signal out)
+  uint16_t frontEchoPin;    //  Echo pin for ultrasonic signal    (signal in)
+  uint16_t rearTrigPin;     //  Trigger pin for rear-facing ultrasonic sensor (signal out)
+  uint16_t rearEchoPin;     //  Echo pin for rear-facing ultrasonic signal    (signal in)
+  uint16_t startPin;        //  Button 2
+  uint16_t pirPin;          //  PIR Motion Sensor pin
+};
+
 // Play a beep sound to the buzzer at a given frequency
 void beep(int freq, int buzzer)
 {
