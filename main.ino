@@ -1,14 +1,16 @@
 /**
- * This file is the main driver for controlling MARVIN the TI RSLK MAX 
+ * This file is the main driver for controlling MARV the TI RSLK MAX 
  * Robot
  * 
  * kward
  */
+#include <LiquidCrystal_I2C.h>
 #include "Marv.h"
 #include "Morse.h"
 #include "I2C.h"
 #include "IMU.h"
 #include "LCD.h"
+#include "Labs.h"
 
 uint16_t buzzerPin = 2;       //  GPIO pin for the buzzer
 uint16_t imuSda = 3;          //  Serial data port for the imu
@@ -17,41 +19,12 @@ uint16_t morseLed = 41;       //  LED pin for blinking messages alongside the au
 uint16_t trigPin = 32;        //  Trigger pin for ultrasonic sensor (signal out)
 uint16_t echoPin = 31;        //  Echo pin for ultrasonic signal    (signal in)
 uint16_t startPin = 74;       //  Button 2
+uint16_t pirPin = 50;
 
 Marv* robot;
 
 uint32_t maxItrs = 1;
 uint8_t itrs = 0;
-
-// Drive square test
-void driveSquare(float sideLen)
-{
-  Serial.println("\nInitial heading: " + String(robot->imu->heading));
-  alarm(500, buzzerPin, 500, 3);
-  delay(1000);
-  robot->motors->forward(sideLen);
-  delay(1000);
-  robot->motors->turn(-90);
-  delay(1000);
-  robot->motors->forward(sideLen);
-  delay(1000);
-  robot->motors->turn(-90);
-  delay(1000);
-  robot->motors->forward(sideLen);
-  delay(1000);
-  robot->motors->turn(-90);
-  delay(1000);
-  robot->motors->forward(sideLen);
-  delay(1000);
-  robot->motors->turn(-90);
-  delay(1000);
-}
-
-// For IMU tests
-void imuTest()
-{
-  ;
-}
 
 // For testing new functionality
 void test()
@@ -71,6 +44,10 @@ void test()
   Serial.print("\tRoll = " + String(pyr[2]) + " deg\n");
 
   Serial.println("\n\nSampling rate: " + String(robot->imu->getSamplingRate()) + "Hz");
+
+  robot->motors->forward(5);
+  delay(500);
+  robot->motors->turn(90);
   
   delay(1000);
   
@@ -114,10 +91,11 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
+  // Setup PIR Sensor pins
+  pinMode(pirPin, INPUT);
 
-  robot = new Marv(buzzerPin, morseLed, trigPin, echoPin);
-  
-  delay(2000);
+  robot = new Marv(buzzerPin, morseLed, trigPin, echoPin, pirPin, &lcdI2C_module);
+
   Serial.println("\n\nEnd setup()\n");
 }
 
@@ -128,14 +106,17 @@ void loop() {
 //    exit(0);
 //  }
 
-//  if(digitalRead(startPin) == 0)
-//  {
-//    driveSquare(30.5*3);
-//  }
+  // Measure distance to nearest object
+  long dist = robot->frontSonicSensor->measure();
+  robot->lcd->showMessage("Distance: " + String(dist) + "cm", -1, 0, 0);
 
-  robot->checkBumpers();
-  robot->monitorForwardSensor();
-  
+  if(digitalRead(startPin) == 0)
+  {
+    lab5Demo(robot);
+  }
+
+  //robot->checkBumpers();
+  //robot->monitorForwardSensors();
   
   delay(200);
 
