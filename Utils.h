@@ -8,6 +8,8 @@
  */
 #include <Math.h>
 
+LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
+
 // Create a custom type definition for MARV's internal functions
 typedef void (*marv_func_t)();
 
@@ -31,19 +33,60 @@ void beep(int freq, int buzzer, double dur)
   
 }
 
-void alarm(int freq, int buzzer, double dur, int beeps)
+// Play alarm using beeper and given led
+void alarm(int freq, int buzzer, double dur, int beeps, int led)
 {
-  // Ensure Green and blue led are low
-  digitalWrite(GREEN_LED, LOW);
-  digitalWrite(BLUE_LED, LOW);
+  // Check led and ensure all others are off
+  switch(led) {
+
+    // Red LED will be used
+    case RED_LED:
+      // Ensure Green and blue led are low
+      digitalWrite(GREEN_LED, LOW);
+      digitalWrite(BLUE_LED, LOW);
+      break;
+
+    // Blue LED will be used
+    case BLUE_LED:
+      // Ensure red and blue led are low
+      digitalWrite(RED_LED, LOW);
+      digitalWrite(BLUE_LED, LOW);
+      break;
+
+    // Yellow LED will be used
+    case YELLOW_LED:
+      // Ensure red , green, and blue led are low
+      digitalWrite(RED_LED, LOW);
+      digitalWrite(BLUE_LED, LOW);
+      digitalWrite(GREEN_LED, LOW);
+      break;
+  }
+  
 
   // Play alarm beeps
   for(int i = 0; i < beeps; i++)
   {
-    digitalWrite(RED_LED, HIGH);
+    digitalWrite(led, HIGH);
     beep(freq,buzzer,dur);
-    digitalWrite(RED_LED, LOW);
+    digitalWrite(led, LOW);
     delay(dur/2);
+  }
+}
+
+
+// Clamp a variable to be within a specified range of values
+int clamp(int value, int minVal, int maxVal)
+{
+  if(value < minVal)
+  {
+    return minVal;
+  }
+  else if(value > maxVal)
+  {
+    return maxVal;
+  }
+  else {
+    return value;
   }
 }
 
