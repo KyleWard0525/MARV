@@ -12,7 +12,13 @@ class UltrasonicSensor {
     uint16_t trigPin;
     
  public:
-  const uint8_t forwardOffsetDist = 10;   //  Sensor is ~10cm behind front bumpers
+  uint8_t warningLimit = 3;               //  Number of times forward collision is avoided before emitting a warning
+  uint8_t alarmLimit = 6;                 //  Number of times forward collision is avoided before playing an alarm            
+  int eventDuration = 5000;               //  Duration in ms of each measurement 'event' (i.e. the period of time in which to count the number of collision avoidances)
+  int avoids = 0;                         //  Number of forward collisions avoided
+  uint32_t offsetDist;                    //  Offset distance from sensor to edge of the robot
+  uint32_t bufferDist;                    //  Safe buffer zone to avoid crashing into things  
+  long eventStart;                        //  Time at start of current 'event'
 
   //  Main constructor
   UltrasonicSensor(uint16_t ePin, uint16_t tPin)
