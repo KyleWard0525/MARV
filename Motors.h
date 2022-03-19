@@ -336,7 +336,7 @@ class Motors {
       long dist = sonicSensor->measure();
       
       // Check if object is within forward buffer zone
-      if(dist <= sonicSensor->forwardOffsetDist + 5)
+      if(dist <= sonicSensor->offsetDist + sonicSensor->bufferDist)
       {
         // Check if an ultrasonic measurement event has started
         if(sonicSensor->avoids == 0)
