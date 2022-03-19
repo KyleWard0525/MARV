@@ -27,12 +27,12 @@ that may still include bugs or unfinished components.
 
 ### v0.0.2:
 - Added LCD1602A LCD Screen
-- Added I2C interface for read/write operations to device registers
-- Started implementing LCD API
-- Started implementing Motors API for far more precise and dynamic movement functions
-- Ultrasonic Sensor
+- Added I2C.h to interface with MARV's onboard I2C channels for read/write operations to device registers
+- Added LCD.h for interfacing with LCD screen
+- Added Motors.h for far more precise and dynamic movement functions
+- Ultrasonic.h for interfacing with ultrasonic sensors
 - Added automatic forward collision avoidance using ultrasonic sensor
-- Added collision detection when turning right or left ***NEED TO FIX IN NEW REFACTOR***
+- Added collision detection when turning
 
 
 ![MARV v0.0.1](images/MARV0.0.1.jpg)
