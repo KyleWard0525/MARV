@@ -6,7 +6,7 @@
  * 
  * kward
  */
-#include "LiquidCrystal_I2C.h"
+#include <LiquidCrystal_I2C.h>
 
 
 class LCD {
@@ -21,10 +21,14 @@ class LCD {
     const uint8_t screenPadding = 1;              //  Columns of padding on both sides
     LiquidCrystal_I2C* screen;                    //  I2C Interface for communicating with LCD I2C module
 
-    LCD(LiquidCrystal_I2C* i2cModule)
+    LCD(LiquidCrystal_I2C* lcdI2C_module)
     {
+      //LiquidCrystal_I2C lcdI2C_module(deviceAddr,nCols,nRows);
+      //lcdI2C_module.init();
+      
+      screen = lcdI2C_module;
+      
       // Create i2c module objects     
-      screen = i2cModule;
       screen->init();
       screen->noBlink();
     }
@@ -66,12 +70,12 @@ class LCD {
     }
 
     //  Show message on screen for a specified time (-1 for infinite)
-    void showMessage(const char* message, int dur, int cursorX, int cursorY)
+    void showMessage(String message, int dur, int cursorX, int cursorY)
     {
       on();
       screen->blink();
       screen->setCursor(cursorX, cursorY);
-      screen->print(message);
+      screen->print(message.c_str());
 
       if(dur == -1)
       {
@@ -82,6 +86,12 @@ class LCD {
         off();
       }
     }
+
+    int getPadding()
+    {
+      return screenPadding;
+    }
+    
 };
 
 
