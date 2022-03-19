@@ -12,16 +12,8 @@
 #include "LCD.h"
 #include "Labs.h"
 
-uint16_t buzzerPin = 2;       //  GPIO pin for the buzzer
-uint16_t imuSda = 3;          //  Serial data port for the imu
-uint16_t imuScl = 23;         //  Serial clock for imu
-uint16_t morseLed = 41;       //  LED pin for blinking messages alongside the audible beeps from the buzzer
-uint16_t trigPin = 32;        //  Trigger pin for ultrasonic sensor (signal out)
-uint16_t echoPin = 31;        //  Echo pin for ultrasonic signal    (signal in)
-uint16_t startPin = 74;       //  Button 2
-uint16_t pirPin = 50;
-
-Marv* robot;
+Marv* robot;                  //  Main robot driver
+pins_t periphs;               //  Peripheral pins
 
 uint32_t maxItrs = 1;
 uint8_t itrs = 0;
@@ -50,7 +42,6 @@ void test()
   robot->motors->turn(90);
   
   delay(1000);
-  
 }
 
 void setup() {  
@@ -67,8 +58,19 @@ void setup() {
   
   Serial.print("Serial ready!\n");
 
-  pinMode(startPin, INPUT_PULLUP);
+  // Setup peripheral pins struct
+  periphs.buzzer = 2;
+  periphs.imuSda = 3;
+  periphs.imuClk = 23;
+  periphs.morseLed = 41;
+  periphs.frontTrigPin = 32;
+  periphs.frontEchoPin = 31;
+  periphs.rearTrigPin = 42;
+  periphs.rearEchoPin = 43;
+  periphs.startPin = 17;
+  periphs.pirPin = 50;
 
+  pinMode(periphs.startPin, INPUT_PULLUP);
   
   // Set bumper pins as inputs
   pinMode(BP_SW_PIN_0, INPUT_PULLUP);
@@ -82,19 +84,21 @@ void setup() {
   pinMode(RED_LED, OUTPUT);
   pinMode(GREEN_LED, OUTPUT);
   pinMode(BLUE_LED, OUTPUT);
-  pinMode(morseLed, OUTPUT);
+  pinMode(periphs.morseLed, OUTPUT);
   
   // Set buzzer pin as output
-  pinMode(buzzerPin, OUTPUT);
+  pinMode(periphs.buzzer, OUTPUT);
 
   // Setup ultrasonic sensor pins
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+  pinMode(periphs.frontTrigPin, OUTPUT);
+  pinMode(periphs.frontEchoPin, INPUT);
+  pinMode(periphs.rearTrigPin, OUTPUT);
+  pinMode(periphs.rearEchoPin, INPUT);
 
   // Setup PIR Sensor pins
-  pinMode(pirPin, INPUT);
+  pinMode(periphs.pirPin, INPUT);
 
-  robot = new Marv(buzzerPin, morseLed, trigPin, echoPin, pirPin, &lcdI2C_module);
+  robot = new Marv(periphs, &lcdI2C_module);
 
   Serial.println("\n\nEnd setup()\n");
 }
@@ -110,9 +114,10 @@ void loop() {
   long dist = robot->frontSonicSensor->measure();
   robot->lcd->showMessage("Distance: " + String(dist) + "cm", -1, 0, 0);
 
-  if(digitalRead(startPin) == 0)
+  if(digitalRead(periphs.startPin) == 1)
   {
-    lab5Demo(robot);
+    Serial.println("Start button pressed!");
+    alarm(300, periphs.buzzer, 500, 1, GREEN_LED);
   }
 
   //robot->checkBumpers();
