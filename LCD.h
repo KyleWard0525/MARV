@@ -15,7 +15,7 @@ class LCD {
     const uint8_t nRows = 2;                      //  Number of rows in LCD screen
     const uint8_t nCols = 16;                     //  Number of columns in LCD screen
     const uint8_t deviceAddr = 0x27;              //  Device address
-    
+    bool displayOn = false;
     
   public:
     const uint8_t screenPadding = 1;              //  Columns of padding on both sides
@@ -44,6 +44,8 @@ class LCD {
 
       // Reset to initial state
       resetScreen();
+
+      displayOn = true;
     }
 
     //  Turn off LCD display
@@ -57,6 +59,8 @@ class LCD {
       
       // Reset to initial state
       resetScreen();
+
+      displayOn = false;
     }
 
     //  Reset screen to default state
@@ -72,7 +76,11 @@ class LCD {
     //  Show message on screen for a specified time (-1 for infinite)
     void showMessage(String message, int dur, int cursorX, int cursorY)
     {
-      on();
+      if(!displayOn)
+      {
+        on();
+      }
+      
       screen->blink();
       screen->setCursor(cursorX, cursorY);
       screen->print(message.c_str());
