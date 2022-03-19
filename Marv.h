@@ -30,9 +30,7 @@ using namespace std;
 class Marv {
 
   private:
-    uint16_t buzzerPin;                   //  GPIO pin for buzzer
-    uint16_t morseLedPin;                 //  GPIO pin for onboard LED used for communicating in morse code
-    uint16_t pirPin;                      //  Pin for PIR Sensor
+    pins_t periphs;                       //  Peripheral pins
     uint8_t forwardBufferDist;            //  Forward buffer distance in cm
     const float wheelBase = 14;           //  Wheel base in cm
     Bumpers bumpSensors;                  //  Interface for the bump sensors
@@ -90,12 +88,10 @@ class Marv {
     LCD* lcd;                             //  Interface for LCD1602 screen
     
     //  Main constructor
-    Marv(uint16_t buzzPin, uint16_t morsePin, uint16_t tPin, uint16_t ePin, uint16_t irPin, LiquidCrystal_I2C* lcdI2C)
+    Marv(pins_t peripherals, LiquidCrystal_I2C* lcdI2C)
     { 
       // Set peripheral pins
-      buzzerPin = buzzPin;
-      morseLedPin = morsePin;
-      pirPin = irPin;
+      periphs = peripherals;
 
       // Initialize LCD screen
       lcd = new LCD(lcdI2C);
@@ -103,14 +99,14 @@ class Marv {
       Serial.println("LCD initialized.");
       
       // Initialize morse object
-      morse = new Morse(buzzerPin, morseLedPin);
+      morse = new Morse(periphs.buzzer, periphs.morseLed);
       Serial.println("Morse initialized.");
       
       // Initialize IMU
       imu = new IMU(&serialBus);
       
       // Initialize ultrasonic sensors
-      frontSonicSensor = new UltrasonicSensor(ePin, tPin);
+      frontSonicSensor = new UltrasonicSensor(periphs.frontEchoPin, periphs.frontTrigPin);
       frontSonicSensor->bufferDist = 5;
       
       Serial.println("Ultrasonic sensor initialized.");
@@ -136,7 +132,7 @@ class Marv {
         while(bumpSensors.checkForCollision())
         {
           //  Play alert
-          bumpSensors.alert(buzzerPin);
+          bumpSensors.alert(periphs.buzzer);
 
           // Check if anyone has helped marv in the alloted time
           if(millis() - start >= 250)
