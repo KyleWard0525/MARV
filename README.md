@@ -24,6 +24,8 @@ that may still include bugs or unfinished components.
 ![MARV v0.0.2](images/Marv002_side.jpg)
 ***MARV v0.0.2 shown above***
 
+### v0.0.3
+- A touch sensor has been added to allow for starting tasks
 
 ### v0.0.2:
 - Added LCD1602A LCD Screen
