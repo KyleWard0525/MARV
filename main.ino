@@ -68,7 +68,7 @@ void setup() {
   periphs.rearTrigPin = 42;
   periphs.rearEchoPin = 43;
   periphs.startPin = 17;
-  periphs.pirPin = 50;
+  periphs.pirPin = 46;
 
   pinMode(periphs.startPin, INPUT_PULLUP);
   
@@ -110,20 +110,27 @@ void loop() {
 //    exit(0);
 //  }
 
-  // Measure distance to nearest object
-  long dist = robot->frontSonicSensor->measure();
-  robot->lcd->showMessage("Distance: " + String(dist) + "cm", -1, 0, 0);
+    // Check PIR Sensor
+    int pirState = digitalRead(periphs.pirPin);
+    if(pirState == HIGH)
+    {
+      Serial.println("PIR Triggered!");
+      digitalWrite(RED_LED,HIGH);
+    }
 
+  // Measure distance to nearest object in front and rear
+//  long front_dist = robot->frontSonicSensor->measure();
+//  robot->lcd->showMessage("Front: " + String(front_dist) + "cm", -1, 0, 0);
+//  long rear_dist = robot->rearSonicSensor->measure();
+//  robot->lcd->showM essage("Rear: " + String(rear_dist) + "cm", -1, 0, 1);
+  
   if(digitalRead(periphs.startPin) == 1)
   {
     Serial.println("Start button pressed!");
     alarm(300, periphs.buzzer, 500, 1, GREEN_LED);
   }
-
-  //robot->checkBumpers();
-  //robot->monitorForwardSensors();
   
-  delay(200);
+  delay(500);
 
   itrs++;  
 }
