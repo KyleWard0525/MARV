@@ -85,6 +85,7 @@ class Marv {
     IMU* imu;                             //  Measuring acceleration and gyro forces
     Morse* morse;                         //  Communcation with the outside world through Morse code
     UltrasonicSensor* frontSonicSensor;   //  Forward facing sensor for measuring distance using ultrasound
+    UltrasonicSensor* rearSonicSensor;    //  Rear facing sensor for measuring distance using ultrasound
     LCD* lcd;                             //  Interface for LCD1602 screen
     
     //  Main constructor
@@ -107,9 +108,14 @@ class Marv {
       
       // Initialize ultrasonic sensors
       frontSonicSensor = new UltrasonicSensor(periphs.frontEchoPin, periphs.frontTrigPin);
+      frontSonicSensor->offsetDist = 10;
       frontSonicSensor->bufferDist = 5;
-      
-      Serial.println("Ultrasonic sensor initialized.");
+      Serial.println("Front ultrasonic sensor initialized.");
+
+      rearSonicSensor = new UltrasonicSensor(periphs.rearEchoPin, periphs.rearTrigPin);
+      rearSonicSensor->offsetDist = 0;
+      rearSonicSensor->bufferDist = 5;
+      Serial.println("Rear ultrasonic sensor initialized.");
 
       //Initialize motors
       motors = new Motors(imu, frontSonicSensor);
@@ -192,13 +198,6 @@ class Marv {
         }
       }
     }
-
-
-   void say(String msg)
-   {
-    lcd->showMessage("Hi", 1000, 1, 0);
-   }
-
     
 };
 
