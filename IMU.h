@@ -138,9 +138,9 @@ class IMU {
 
          Finally, add the two numbers together to create a signed 16-bit number.
       */
-      int16_t AxRaw = (serialBus->readByte(mpuAddr, AxHighAddr) << 8) + serialBus->readByte(mpuAddr, AxLowAddr);  //  Read raw x acceleration
-      int16_t AyRaw = (serialBus->readByte(mpuAddr, AyHighAddr) << 8) + serialBus->readByte(mpuAddr, AyLowAddr);  //  Read raw y acceleration
-      int16_t AzRaw = (serialBus->readByte(mpuAddr, AzHighAddr) << 8) + serialBus->readByte(mpuAddr, AzLowAddr);  //  Read raw z acceleration
+      int16_t AxRaw = (serialBus->readByte(mpuAddr, AxHighAddr) << 8) | serialBus->readByte(mpuAddr, AxLowAddr);  //  Read raw x acceleration
+      int16_t AyRaw = (serialBus->readByte(mpuAddr, AyHighAddr) << 8) | serialBus->readByte(mpuAddr, AyLowAddr);  //  Read raw y acceleration
+      int16_t AzRaw = (serialBus->readByte(mpuAddr, AzHighAddr) << 8) | serialBus->readByte(mpuAddr, AzLowAddr);  //  Read raw z acceleration
 
       /*
          Since the IMU has been set to use an accel tolerance of +-4g, raw values must be converted
@@ -169,21 +169,29 @@ class IMU {
           positive Gy = roll right, negative Gy = roll left
           positive Gx = pitch up, negative Gx = pitch down
       */
-      int16_t GxRaw = (serialBus->readByte(mpuAddr, GxHighAddr) << 8) + serialBus->readByte(mpuAddr, GxLowAddr);  //  Read raw x acceleration
-      int16_t GyRaw = (serialBus->readByte(mpuAddr, GyHighAddr) << 8) + serialBus->readByte(mpuAddr, GyLowAddr);  //  Read raw y acceleration
-      int16_t GzRaw = (serialBus->readByte(mpuAddr, GzHighAddr) << 8) + serialBus->readByte(mpuAddr, GzLowAddr);  //  Read raw z acceleration
+      int16_t GxRaw = (serialBus->readByte(mpuAddr, GxHighAddr) << 8) | serialBus->readByte(mpuAddr, GxLowAddr);  //  Read raw x acceleration
+      int16_t GyRaw = (serialBus->readByte(mpuAddr, GyHighAddr) << 8) | serialBus->readByte(mpuAddr, GyLowAddr);  //  Read raw y acceleration
+      int16_t GzRaw = (serialBus->readByte(mpuAddr, GzHighAddr) << 8) | serialBus->readByte(mpuAddr, GzLowAddr);  //  Read raw z acceleration
 
       // Apply a low pass filter to the signals to remove excess noise
-      double filtForces[3] = {GxRaw, GyRaw, GzRaw};
-      lowPassFilter(filtForces, 0.1);
+      // Create filtered variables
+      double Fx = 0;
+      double Fy = 0;
+      double Fz = 0;
+      double alpha = 0.9;
+    
+      // Apply low-pass filter
+      Fx = GxRaw * alpha + ((1.0 - alpha) * Fx);
+      Fy = GyRaw * alpha + ((1.0 - alpha) * Fy);
+      Fz = GzRaw * alpha + ((1.0 - alpha) * Fz);
       
       /*
        * According to the datasheet (https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf),
        * to convert from LSB -> deg/s at a range of +-500 deg/s. We must divide the raw values by 65.5
        */
-       double Gx = filtForces[0] / 65.5;
-       double Gy = filtForces[1] / 65.5;
-       double Gz = filtForces[2] / 65.5;
+       double Gx = Fx / 65.5;
+       double Gy = Fy / 65.5;
+       double Gz = Fz / 65.5;
 
        retArr[0] = Gx;
        retArr[1] = Gy;
@@ -236,7 +244,6 @@ class IMU {
     {
       // Arrays to store accel and gyro values
       double accelArr[3];
-      double gyroArr[3];
 
       // Read accel values from mpu registers
       getAccels(accelArr);
@@ -247,6 +254,7 @@ class IMU {
       retArr[2] = accelArr[2];  //  Az
 
       // Read gyro values from mpu registers
+      double gyroArr[3];
       getGyros(gyroArr);
 
       // Populate return array with gyro values
