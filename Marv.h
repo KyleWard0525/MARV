@@ -86,7 +86,7 @@ class Marv {
     Motors* motors;                       //  API for precise motor controls
     IMU* imu;                             //  Measuring acceleration and gyro forces
     Morse* morse;                         //  Communcation with the outside world through Morse code
-    UltrasonicSensor* sonicSensor;        //  For measuring distance using ultrasound
+    UltrasonicSensor* frontSonicSensor;   //  Forward facing sensor for measuring distance using ultrasound
     LCD* lcd;                             //  Interface for LCD1602 screen
     
     //  Main constructor
@@ -109,16 +109,18 @@ class Marv {
       // Initialize IMU
       imu = new IMU(&serialBus);
       
-      // Initialize ultrasonic sensor
-      sonicSensor = new UltrasonicSensor(ePin, tPin);
+      // Initialize ultrasonic sensors
+      frontSonicSensor = new UltrasonicSensor(ePin, tPin);
+      frontSonicSensor->bufferDist = 5;
+      
       Serial.println("Ultrasonic sensor initialized.");
 
       //Initialize motors
-      motors = new Motors(imu, sonicSensor);
+      motors = new Motors(imu, frontSonicSensor);
 
       // Set MARV's initial internal states and variables
       emotions.feeling = emotions.Idle;
-      forwardBufferDist = sonicSensor->forwardOffsetDist + 5; // 5cm buffer in front of robot
+      forwardBufferDist = frontSonicSensor->offsetDist + frontSonicSensor->bufferDist; // 5cm buffer in front of robot
 
       // Signal that MARV is ready to go
       signalReady();
@@ -168,27 +170,27 @@ class Marv {
 //      }
       
       // Measure distance to nearest object
-      long dist = sonicSensor->measure();
+      long dist = frontSonicSensor->measure();
       lcd->showMessage("Distance: " + String(dist) + "cm", -1, 0, 0); lcd->showMessage("Distance: " + String(dist) + "cm", -1, 0, 0); 
 
       // Check if object is within forward buffer zone
       if(dist <= forwardBufferDist)
       {
         // Check if an ultrasonic measurement event has started
-        if(sonicSensor->avoids == 0)
+        if(frontSonicSensor->avoids == 0)
         {
           // Start measurement event
-          sonicSensor->eventStart = millis();
+          frontSonicSensor->eventStart = millis();
         }
         
         // Reverse away from the object
         motors->reverse(5);
 
         // Increment collisions avoided
-        sonicSensor->avoids++;
+        frontSonicSensor->avoids++;
 
         // Check number of avoidances (i.e. is an object still following MARV)
-        if(sonicSensor->avoids >= sonicSensor->warningLimit)
+        if(frontSonicSensor->avoids >= frontSonicSensor->warningLimit)
         {
           // Play warning
         }
