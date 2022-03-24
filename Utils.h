@@ -25,6 +25,11 @@ struct pins_t {
   uint16_t rearEchoPin;     //  Echo pin for rear-facing ultrasonic signal    (signal in)
   uint16_t startPin;        //  Button 2
   uint16_t pirPin;          //  PIR Motion Sensor pin
+  uint16_t stepIn_1;        //  Input 1 to stepper motor
+  uint16_t stepIn_2;        //  Input 2 to stepper motor
+  uint16_t stepIn_3;        //  Input 3 to stepper motor
+  uint16_t stepIn_4;        //  Input 4 to stepper motor
+  uint16_t servoPin;        //  Signal pin for servo motor
 };
 
 // Play a beep sound to the buzzer at a given frequency
