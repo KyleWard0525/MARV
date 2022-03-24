@@ -5,6 +5,7 @@
  * kward
  */
 #include <LiquidCrystal_I2C.h>
+#include "Servo.h"
 #include "Marv.h"
 #include "Morse.h"
 #include "I2C.h"
@@ -13,6 +14,7 @@
 #include "Labs.h"
 
 Marv* robot;                  //  Main robot driver
+Servo servo;                  //  Servo motor object
 pins_t periphs;               //  Peripheral pins
 
 uint32_t maxItrs = 1;
@@ -37,9 +39,7 @@ void test()
 
   Serial.println("\n\nSampling rate: " + String(robot->imu->getSamplingRate()) + "Hz");
 
-  robot->motors->forward(5);
-  delay(500);
-  robot->motors->turn(90);
+  robot->motors->turn(90); 
   
   delay(1000);
 }
@@ -59,18 +59,24 @@ void setup() {
   Serial.print("Serial ready!\n");
 
   // Setup peripheral pins struct
-  periphs.buzzer = 2;
-  periphs.imuSda = 3;
-  periphs.imuClk = 23;
-  periphs.morseLed = 41;
-  periphs.frontTrigPin = 32;
-  periphs.frontEchoPin = 31;
-  periphs.rearTrigPin = 42;
-  periphs.rearEchoPin = 43;
-  periphs.startPin = 17;
-  periphs.pirPin = 46;
+  periphs.buzzer = 2;             //  P6_0
+  periphs.imuSda = 3;             //  P3_2
+  periphs.imuClk = 23;            //  P6_1
+  periphs.morseLed = 41;          //  P8_5
+  periphs.frontTrigPin = 34;      //  P2_3
+  periphs.frontEchoPin = 35;      //  P6_7
+  periphs.rearTrigPin = 42;       //  P9_0
+  periphs.rearEchoPin = 43;       //  P8_4
+  periphs.startPin = 63;          //  P6_3
+  periphs.pirPin = 46;            //  P6_2
+  periphs.servoPin = 67;          //  P9_7
+
+
+  // Setup servo pin (Must be initialized here, before other setup)
+  servo.attach(periphs.servoPin);
 
   pinMode(periphs.startPin, INPUT_PULLUP);
+  pinMode(PUSH2, INPUT_PULLUP);
   
   // Set bumper pins as inputs
   pinMode(BP_SW_PIN_0, INPUT_PULLUP);
@@ -99,38 +105,19 @@ void setup() {
   pinMode(periphs.pirPin, INPUT);
 
   robot = new Marv(periphs, &lcdI2C_module);
-
   Serial.println("\n\nEnd setup()\n");
 }
 
 void loop() {
-//  if(itrs >= maxItrs)
-//  {
-//    Serial.println("\nEnd of program\n");
-//    exit(0);
-//  }
-
-    // Check PIR Sensor
-    int pirState = digitalRead(periphs.pirPin);
-    if(pirState == HIGH)
-    {
-      Serial.println("PIR Triggered!");
-      digitalWrite(RED_LED,HIGH);
-    }
-
-  // Measure distance to nearest object in front and rear
-//  long front_dist = robot->frontSonicSensor->measure();
-//  robot->lcd->showMessage("Front: " + String(front_dist) + "cm", -1, 0, 0);
-//  long rear_dist = robot->rearSonicSensor->measure();
-//  robot->lcd->showM essage("Rear: " + String(rear_dist) + "cm", -1, 0, 1);
-  
-  if(digitalRead(periphs.startPin) == 1)
+ 
+  if(digitalRead(periphs.startPin)==1 || digitalRead(PUSH2)==0)
   {
     Serial.println("Start button pressed!");
-    alarm(300, periphs.buzzer, 500, 1, GREEN_LED);
+    delay(250);
+    //test();
+    Quiz17(robot);
   }
-  
-  delay(500);
 
-  itrs++;  
+  
+  delay(100); 
 }
