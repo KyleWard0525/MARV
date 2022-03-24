@@ -22,22 +22,23 @@ class Motors {
     const float wheelDiameter = 6.9999;             //  Wheel diameter in cm
     const float wheelBase = 14;                     //  Wheel base in cm
     const float gearRatio = 120;                    //  120:1 because ratio = (360 / pulses per motor revolution(3)) 
-    const int defaultDriveSpeed = 50;               //  Default driving speed
-    const int defaultTurnSpeed = 50;                //  Default turning speed
     double cmPerPulse;                              //  Centimeters traveled per pulse
-    
+    pins_t periphs;                                 //  Struct of peripheral pins
 
   public:
     Romi_Motor_Power leftMotor;                       //  For controlling left wheel
     Romi_Motor_Power rightMotor;                      //  For controlling right wheel
     Bumpers bumpSensors;                              //  Bump sensor interface
+    LCD* lcd;                                         //  Interface for LCD1602 screen
     IMU* imu;                                         //  Onboard IMU
     UltrasonicSensor* sonicSensor;                    //  Ultrasonic sensor interface
     double heading;                                   //  Current heading angle
     uint16_t buzzerPin = 2;                           //  GPIO pin for the buzzer
+    int defaultDriveSpeed = 15;               //  Default driving speed
+    int defaultTurnSpeed = 40;                //  Default turning speed
 
     //  Main constructor
-    Motors(IMU* mpu, UltrasonicSensor* sonic) 
+    Motors(IMU* mpu, UltrasonicSensor* sonic, LCD* screen, pins_t pins) 
     {
         // Compute cm traveled per pulse
         cmPerPulse = (wheelDiameter * M_PI) / (gearRatio * pulsesPerMotorRev);
@@ -54,9 +55,11 @@ class Motors {
         // Initialize heading to 0
         heading = 0;
 
-        // Set imu
+        // Set class objects
         imu = mpu;
         sonicSensor = sonic;
+        periphs = pins;
+        lcd = screen;
     }
 
     //  Move the robot forward a given number of cm's
@@ -93,8 +96,10 @@ class Motors {
      // Wait for motor encoder to read nPulses (distance traveled = dist_cm)
      while(getEncoderLeftCnt() < nPulses && getEncoderRightCnt() < nPulses)
      {
-         // Check for bumper collision
+         // Check forward sensors
          monitorForwardSensors();
+
+         delay(1);
 //
 //        // Poll IMU
 //        imu->poll(imuVals);
@@ -128,8 +133,8 @@ class Motors {
      }
      
       // Stop motors
-      leftMotor.disableMotor();
       rightMotor.disableMotor();
+      leftMotor.disableMotor();
       
       Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
     }
@@ -151,13 +156,14 @@ class Motors {
       rightMotor.enableMotor();
 
       // Set motor speed (start moving)
-      leftMotor.setSpeed(defaultTurnSpeed-10);
-      rightMotor.setSpeed(defaultTurnSpeed-10);
+      leftMotor.setSpeed(40);
+      rightMotor.setSpeed(40);
 
 
      // Wait for motor encoder to read nPulses (distance traveled = dist_cm)
      while(getEncoderLeftCnt() < nPulses && getEncoderRightCnt() < nPulses)
      {
+      // TODO: Monitor rear sensors
         delay(1);
      }
      
@@ -170,7 +176,7 @@ class Motors {
     }
 
     // Turn a given number of degrees (negative=left turn, positive=right turn)
-    void turn(float nDeg)
+    void turn(int nDeg)
     {
       unsigned long timestep = 0;
       unsigned long prevTimeStep = 0;
@@ -218,7 +224,7 @@ class Motors {
         double prevGz = 0;
 
         // Wait for motor encoder to read nPulses
-        while(getEncoderLeftCnt() < nPulses || getEncoderRightCnt() < nPulses)
+        while(getEncoderRightCnt() < nPulses || getEncoderRightCnt() < nPulses)
         {
           // Check forward facing sensors
           monitorForwardSensors();
@@ -232,12 +238,8 @@ class Motors {
 //          // Update heading
 //          heading += (imuVals[5] - prevGz)*timestep;
           
-          if(getEncoderLeftCnt() % int(nPulses/2) == 0)
-          {
-            leftMotor.setSpeed(int(defaultTurnSpeed/2));
-            rightMotor.setSpeed(int(defaultTurnSpeed/2));
-          }
-          delay(1);
+          
+          delay(100);
 //          prevGz = imuVals[5];
         }
 
@@ -280,12 +282,12 @@ class Motors {
 //          // Update heading
 //          heading += (imuVals[5] - prevGz)*timestep;
           
-          if(getEncoderLeftCnt() % (nPulses/2) == 0)
-          {
-            leftMotor.setSpeed(int(defaultTurnSpeed/2));
-            rightMotor.setSpeed(int(defaultTurnSpeed/2));
-          }
-
+//          if(getEncoderLeftCnt() % (nPulses/2) == 0)
+//          {
+//            leftMotor.setSpeed(int(defaultTurnSpeed/2));
+//            rightMotor.setSpeed(int(defaultTurnSpeed/2));
+//          }
+          delay(100);
 //          prevGz = imuVals[5];
          
         }
@@ -294,8 +296,8 @@ class Motors {
         leftMotor.disableMotor();
         rightMotor.disableMotor();
         
-        //Serial.println("Pulses needed to turn " + String(nDeg) + " degrees = " + String(nPulses));
-        //Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
+        Serial.println("Pulses needed to turn " + String(nDeg) + " degrees = " + String(nPulses));
+        Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
       }
     }
 
@@ -312,10 +314,7 @@ class Motors {
           bumpSensors.alert(buzzerPin);
 
           // Check if anyone has helped marv in the alloted time
-          if(millis() - start >= 50)
-          {
-            reverse(5); // Reverse ~5cm
-          }
+          reverse(5); // Reverse ~5cm
         }
       } else {
         bumpSensors.setStatusLed(1);
@@ -327,35 +326,37 @@ class Motors {
     void monitorForwardSensors()
     {
       // Check PIR Sensor
-//      if(digitalRead(pirPin) == 1)
+//      if(digitalRead(periphs.pirPin) == 1)
 //      {
-//        Serial.println("PIR Triggered!");
-//        alarm(300, buzzerPin, 500, 1, RED_LED);
+//        lcd->showMessage("Heat Signature", -1, 0, 0);
+//        lcd->showMessage("Detected!", -1, 4, 1);
+//      }
+//      else {
+//        lcd->off();
 //      }
 
+      checkBumpers();
       long dist = sonicSensor->measure();
       
       // Check if object is within forward buffer zone
       if(dist <= sonicSensor->offsetDist + sonicSensor->bufferDist)
       {
-        // Check if an ultrasonic measurement event has started
+        //Check if an ultrasonic measurement event has started
         if(sonicSensor->avoids == 0)
         {
           // Start measurement event
           sonicSensor->eventStart = millis();
         }
-        
-        // Reverse away from the object
-        reverse(5);
-
         // Increment collisions avoided
         sonicSensor->avoids++;
-
         // Check number of avoidances (i.e. is an object still following MARV)
         if(sonicSensor->avoids >= sonicSensor->warningLimit)
         {
           // Play warning
         }
+
+        // Reverse away from the object
+        reverse(5);
       }
     }
 
