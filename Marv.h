@@ -13,6 +13,7 @@
 #include <Romi_Motor_Power.h>
 #include <LiquidCrystal_I2C.h>
 #include "Energia.h"
+#include "Servo.h"
 #include "GPIO.h"
 #include "RSLK_Pins.h"
 #include "Utils.h"
@@ -30,7 +31,6 @@ using namespace std;
 class Marv {
 
   private:
-    pins_t periphs;                       //  Peripheral pins
     uint8_t forwardBufferDist;            //  Forward buffer distance in cm
     const float wheelBase = 14;           //  Wheel base in cm
     Bumpers bumpSensors;                  //  Interface for the bump sensors
@@ -79,7 +79,7 @@ class Marv {
     } emotions;
     
   public:
-
+    pins_t periphs;                       //  Peripheral pins
     I2C serialBus;                        //  Reading and writing data of I2C channels
     Motors* motors;                       //  API for precise motor controls
     IMU* imu;                             //  Measuring acceleration and gyro forces
@@ -87,12 +87,14 @@ class Marv {
     UltrasonicSensor* frontSonicSensor;   //  Forward facing sensor for measuring distance using ultrasound
     UltrasonicSensor* rearSonicSensor;    //  Rear facing sensor for measuring distance using ultrasound
     LCD* lcd;                             //  Interface for LCD1602 screen
+    Servo servo;                          //  Servo API
     
     //  Main constructor
     Marv(pins_t peripherals, LiquidCrystal_I2C* lcdI2C)
     { 
       // Set peripheral pins
       periphs = peripherals;
+      servo.attach(periphs.servoPin);
 
       // Initialize LCD screen
       lcd = new LCD(lcdI2C);
@@ -117,88 +119,28 @@ class Marv {
       rearSonicSensor->bufferDist = 5;
       Serial.println("Rear ultrasonic sensor initialized.");
 
-      //Initialize motors
-      motors = new Motors(imu, frontSonicSensor);
+      // Initialize motors
+      motors = new Motors(imu, frontSonicSensor, lcd, periphs);
 
       // Set MARV's initial internal states and variables
       emotions.feeling = emotions.Idle;
-      forwardBufferDist = frontSonicSensor->offsetDist + frontSonicSensor->bufferDist; // 5cm buffer in front of robot
+      forwardBufferDist = frontSonicSensor->offsetDist + frontSonicSensor->bufferDist; // buffer in front of robot
 
       // Signal that MARV is ready to go
       signalReady();
     }
-
-    // Check bumpers for collision and handle response
-    void checkBumpers()
-    {
-      if(bumpSensors.checkForCollision())
-      {
-        unsigned long start = millis();
-        
-        while(bumpSensors.checkForCollision())
-        {
-          //  Play alert
-          bumpSensors.alert(periphs.buzzer);
-
-          // Check if anyone has helped marv in the alloted time
-          if(millis() - start >= 250)
-          {
-            motors->reverse(5); // Reverse ~5cm
-          }
-        }
-      } else {
-        bumpSensors.setStatusLed(1);
-      }
-    }
-
+    
     // Signal that MARV is ready
     void signalReady()
     {
+      // Show message on lcd screen
+      lcd->resetScreen();
+      lcd->showMessage("Ready!", 1500, 5, 0);
+
       // Play 'ready' beep
       morse->i(); 
-
-      // Show message on lcd screen
-      lcd->showMessage("Ready!", 1500, 5, 0);
     }
 
-    // Check objects in front of marv and attempt to handle various situations
-    void monitorForwardSensors()
-    {
-      // Check PIR Sensor
-//      if(digitalRead(pirPin) == 1)
-//      {
-//        Serial.println("PIR Triggered!");
-//        alarm(300, buzzerPin, 500, 1, RED_LED);
-//      }
-      
-      // Measure distance to nearest object
-      long dist = frontSonicSensor->measure();
-      lcd->showMessage("Distance: " + String(dist) + "cm", -1, 0, 0); lcd->showMessage("Distance: " + String(dist) + "cm", -1, 0, 0); 
-
-      // Check if object is within forward buffer zone
-      if(dist <= forwardBufferDist)
-      {
-        // Check if an ultrasonic measurement event has started
-        if(frontSonicSensor->avoids == 0)
-        {
-          // Start measurement event
-          frontSonicSensor->eventStart = millis();
-        }
-        
-        // Reverse away from the object
-        motors->reverse(5);
-
-        // Increment collisions avoided
-        frontSonicSensor->avoids++;
-
-        // Check number of avoidances (i.e. is an object still following MARV)
-        if(frontSonicSensor->avoids >= frontSonicSensor->warningLimit)
-        {
-          // Play warning
-        }
-      }
-    }
-    
 };
 
 
