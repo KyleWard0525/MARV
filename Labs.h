@@ -176,9 +176,143 @@ void Quiz17(Marv* robot)
 }
 
 /**
+ * Lab 7:
+ * 
+ * The robot will be placed in a position such that the closest wall is
+ * 120cm away. The robot will:
+ * 
+ * 1. Turn the servo 180deg taking an ultrasonic measurement every n degrees
+ * 2. Store measurements in array
+ * 3. Turn 180deg in place
+ * 4. Repeat steps 1 and 2
+ * 5. Search array for the closest object
+ * 6. Turn in place to face closest object
+ * 7. Drive towards object
+ * 8. Stop when bumpers collide with object
+ */
+ void lab7(Marv* robot)
+ {
+  long sweep1[185];     //  Array of distances for first sweep
+  long sweep2[185];     //  Array of distances for second sweep
+
+  // Move servo through first sweep
+  for(int i = 0; i < (sizeof(sweep1)/sizeof(sweep1[0])); i++)
+  {
+    // Move servo to position i
+    robot->servo.write(i);
+    
+    // Measure distance and store in sweep1 array
+    sweep1[i] = robot->frontSonicSensor->measure();
+    
+    delay(50);
+  }
+
+  // Find the index of the minimum value in sweep1
+  int minIdx1 = minIndex(sweep1, sizeof(sweep1)/sizeof(sweep1[0]));
+
+  // Turn robot 180
+  delay(500);
+  robot->motors->turn(185);
+
+  // Move servo through second sweep
+  for(int i = 0; i < (sizeof(sweep2)/sizeof(sweep2[0])); i++)
+  {
+    // Move servo to position i
+    robot->servo.write(i);
+    delay(50);
+    
+    // Measure distance and store in sweep2 array
+    sweep2[i] = robot->frontSonicSensor->measure();
+  }
+
+  // Find index of the minimum value in sweep2
+  int minIdx2 = minIndex(sweep2, sizeof(sweep2)/sizeof(sweep2[0]));
+
+  long minDist = 0;
+
+  // Check which sweep the closest object is in
+  if(sweep1[minIdx1] < sweep2[minIdx2])
+  {
+    delay(500);
+    // Object is in first sweep so turn back around
+    robot->motors->turn(190);
+    delay(500);
+    
+    // Get distance to closest object
+    minDist = sweep1[minIdx1];
+
+    // Move servo to point at the closest object
+    robot->servo.write(minIdx1);
+    
+    // Slow motors for more precise turn (?)
+    robot->motors->defaultTurnSpeed = 40;
+    delay(1000);
+
+    // Check which quadrant closest object is in
+    if(minIdx1 <= 90)
+    {
+      // Quadrant 1
+      int turnAngle = 90 - minIdx1 - 10;         //  Convert servo position to nDegrees for MARV to turn
+      robot->motors->turn(turnAngle);       //  Turn robot to face closest object
+      delay(1000);
+    }
+    else {
+      // Quadrant 2
+      int turnAngle = -(minIdx1 - 90) + 10;      //  Convert servo position to nDegrees for MARV to turn
+      robot->motors->turn(turnAngle);       //  Turn robot to face closest object 
+      delay(1000);
+    }
+
+    // Turn servo to face forward
+    robot->servo.write(90);
+
+    robot->lcd->showMessage("Sweep 1 d=" + String(minDist) + "cm", -1, 0, 0);
+    robot->lcd->showMessage("Servo Pos.: " + String(minIdx1), -1, 0, 1);
+  }
+  // Closest object is in the second sweep (no need to turn around again)
+  else {
+    // Get distance to closest object
+    minDist = sweep2[minIdx2];
+
+    // Move servo to point at the closest object
+    robot->servo.write(minIdx2);
+
+    // Slow motors for more precise turn (?)
+    robot->motors->defaultTurnSpeed = 40;
+    delay(1000);
+
+    // Check which quadrant closest object is in
+    if(minIdx2 <= 90)
+    {
+      // Quadrant 1
+      int turnAngle = 90 - minIdx2 - 10;    //  Convert servo position to nDegrees for MARV to turn
+      robot->motors->turn(turnAngle);       //  Turn robot to face closest object
+      delay(1000);
+    }
+    else {
+      // Quadrant 2
+      int turnAngle = -(minIdx2 - 90) + 10; //  Convert servo position to nDegrees for MARV to turn
+      robot->motors->turn(turnAngle);       //  Turn robot to face closest object 
+      delay(1000);
+    }
+
+    // Turn servo to face forward
+    robot->servo.write(90);
+    
+    robot->lcd->showMessage("Sweep 2, d=" + String(minDist) + "cm", -1, 0, 0);
+    robot->lcd->showMessage("Servo Pos.: " + String(minIdx2), -1, 0, 1);
+  }
+
+  delay(500);
+  // Move forward until robot touches the wall
+  robot->motors->forward(minDist);
+ }
+ 
+
+/**
  * Technically this is Quiz 14 but its basically a lab
  */
-long ultraSonicMeasurement(Marv* robot)
+long Quiz14(Marv* robot)
 {
   // Measure sensor
   long distance = robot->frontSonicSensor->measure();
