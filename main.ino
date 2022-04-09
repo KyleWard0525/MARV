@@ -12,13 +12,40 @@
 #include "IMU.h"
 #include "LCD.h"
 #include "Labs.h"
+#include "Telemetry.h"
 
 Marv* robot;                  //  Main robot driver
 Servo servo;                  //  Servo motor object
-pins_t periphs;               //  Peripheral pins
+pins_t periphs;               //  Peripheral pins     
 
 uint32_t maxItrs = 1;
 uint8_t itrs = 0;
+
+void testIMU_Session()
+{
+  test();
+  delay(1500);
+  // Create an IMU session
+  IMU_Session session(128);
+  session.sampleRateMs = 10;  //  10ms betweeen samples
+
+  // Set IMU session
+  robot->imu->session = &session;
+  
+  unsigned long start = millis();
+  
+  // Poll IMU and print result stored in imu session data
+  robot->motors->driveSpeed = 100;
+  robot->motors->forward(15);
+
+  // Print measurements
+  for(int i = 0; i < session.samples; i++)
+  {
+      session.data[i].to_string();
+  }
+
+  Serial.println("Samples taken in " + String((millis()-start)/1000.0) + "s: " + String(session.samples)); 
+}
 
 // For testing new functionality
 void test()
@@ -29,18 +56,6 @@ void test()
   Serial.print("\nAx = " + String(arr[0]) + "g");
   Serial.print("\tAy = " + String(arr[1]) + "g");
   Serial.print("\tAz = " + String(arr[2]) + "g\n");
-
-  double pyr[3];
-  robot->imu->getPitchYawRoll(pyr);
-
-  Serial.print("\nPitch = " + String(pyr[0]) + " deg ");
-  Serial.print("\tYaw = " + String(pyr[1]) + " deg? ");
-  Serial.print("\tRoll = " + String(pyr[2]) + " deg\n");
-
-  Serial.println("\n\nSampling rate: " + String(robot->imu->getSamplingRate()) + "Hz");
-
-  robot->motors->turn(90); 
-  
   delay(1000);
 }
 
@@ -114,8 +129,7 @@ void loop() {
   {
     Serial.println("Start button pressed!");
     delay(250);
-    //test();
-    lab7(robot);
+    testIMU_Session();
   }
 
   
