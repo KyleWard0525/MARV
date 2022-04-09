@@ -32,6 +32,35 @@ struct pins_t {
   uint16_t servoPin;        //  Signal pin for servo motor
 };
 
+// Struct for storing one measurement of IMU data
+struct imu_vals_t {
+
+  unsigned long timepoint;    //  Time since imu/imu session was started
+  double Ax;                  //  Lateral acceleration
+  double Ay;                  //  Longitudinal acceleration
+  double Az;                  //  Vertical acceleration
+  double Gx;                  //  Rotational acceleration about the x-axis
+  double Gy;                  //  Rotational acceleration about the y-axis
+  double Gz;                  //  Rotational acceleration about the z-axis
+  double pitch;               //  Current pitch angle
+  double roll;                //  Current roll angle
+  double heading;             //  Current heading (currently suffers a lot of gyro drift)
+  double velocity;            //  Current velocity
+  double distance;            //  Distance traveled 
+
+  // Print imu vals
+  void to_string()
+  {
+    Serial.println("<IMU_DATA>");
+    Serial.print("Time=" + String(timepoint/1000.0) + "s,");
+    Serial.print("Ax=" + String(Ax) + "g,Ay=" + String(Ay) + "g,Az=" + String(Az) + "g,");
+    Serial.print("Gx=" + String(Gx) + "deg/s,Gy=" + String(Gy) + "deg/s,Gz=" + String(Gz) + "deg/s,");
+    Serial.print("Pitch=" + String(pitch) + "deg,Roll=" + String(roll) + "deg,");
+    Serial.print("Velocity=" + String(velocity) + "ft/s,Distance=" + String(distance) + "ft.");
+  }
+};
+
+
 // Play a beep sound to the buzzer at a given frequency
 void beep(int freq, int buzzer)
 {
