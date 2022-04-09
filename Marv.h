@@ -60,7 +60,7 @@ class Marv {
         switch(feeling) {
 
           // Idle, MARV is just vibing
-          case Idle:
+          case Idle:  
             // Enable 'Good' emotion LED
             digitalWrite(goodLed, HIGH);
             break;
@@ -110,14 +110,14 @@ class Marv {
       
       // Initialize ultrasonic sensors
       frontSonicSensor = new UltrasonicSensor(periphs.frontEchoPin, periphs.frontTrigPin);
-      frontSonicSensor->offsetDist = 10;
+      frontSonicSensor->offsetDist = 2;
       frontSonicSensor->bufferDist = 5;
       Serial.println("Front ultrasonic sensor initialized.");
 
-      rearSonicSensor = new UltrasonicSensor(periphs.rearEchoPin, periphs.rearTrigPin);
-      rearSonicSensor->offsetDist = 0;
-      rearSonicSensor->bufferDist = 5;
-      Serial.println("Rear ultrasonic sensor initialized.");
+//      rearSonicSensor = new UltrasonicSensor(periphs.rearEchoPin, periphs.rearTrigPin);
+//      rearSonicSensor->offsetDist = 0;
+//      rearSonicSensor->bufferDist = 5;
+//      Serial.println("Rear ultrasonic sensor initialized.");
 
       // Initialize motors
       motors = new Motors(imu, frontSonicSensor, lcd, periphs);
