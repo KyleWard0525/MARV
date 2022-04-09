@@ -10,6 +10,7 @@
 #include <Wire.h>           //  For communicating with I2C devices
 #include <time.h>           //  For timing operations
 #include "I2C.h"
+#include "Telemetry.h"
 #include <MPU6050.h>
 
 class IMU {
@@ -33,12 +34,15 @@ class IMU {
     const byte aConfigAddr = 0x1c;  //  I2C address for acceleration tolerace config register
     const byte gConfigAddr = 0x1B;  //  I2C address for gyro tolerace config register
     const byte srDivAddr = 0x19;    //  I2C address for the sample rate divider register
-    uint8_t gyroConfig;                 //  Gyrometer configuration data byte
-    uint8_t accelConfig;                //  Acceleration configuration data byte
-    I2C* serialBus;                     //  Interface for communicating with device through I2C
+    uint8_t gyroConfig;             //  Gyrometer configuration data byte
+    uint8_t accelConfig;            //  Acceleration configuration data byte
+    unsigned long startTime;        //  Time at device startup
+    I2C* serialBus;                 //  Interface for communicating with device through I2C
+    
 
 
   public:
+    IMU_Session* session;           //  Current IMU session (if any)
     MPU6050* mpu;                   //  MPU interface
     double heading;                 //  Current heading (deg)
     double velocity;                //  Current velocity (cm/s)
@@ -118,11 +122,29 @@ class IMU {
         }
       }
 
+      // Set IMU start time
+      startTime = millis();
+      
       delay(100);
     }
 
 
-    //  Read acceleration data
+    /**  
+     *   Read acceleration data
+     *   
+     *   Ax = lateral acceleration
+     *    - Positive: left turn
+     *    - Negative: right turn
+     *    
+     *   Ay = longitudinal acceleration
+     *    - Positive: Braking/Decelerating
+     *    - Negative: Accelerating forward
+     *    
+     *   Az = Vertical acceleration
+     *    - Positive: Moving down
+     *    - Negative: Moving up (bad for robot)
+     *    
+     */
     void getAccels(double* retArr)
     {
       /*
@@ -142,13 +164,26 @@ class IMU {
       int16_t AyRaw = (serialBus->readByte(mpuAddr, AyHighAddr) << 8) | serialBus->readByte(mpuAddr, AyLowAddr);  //  Read raw y acceleration
       int16_t AzRaw = (serialBus->readByte(mpuAddr, AzHighAddr) << 8) | serialBus->readByte(mpuAddr, AzLowAddr);  //  Read raw z acceleration
 
+      // Apply a low pass filter to the signals to remove excess noise
+      // Create filtered variables
+      double Ax_filt = 1;
+      double Ay_filt = 1;
+      double Az_filt = 1;
+      double alpha = 0.995;
+      double epsilon = 1e-7;  //  For avoiding mulitplying by zero
+    
+      // Apply low-pass filter
+      Ax_filt = AxRaw * alpha + ((1.0 - alpha) * Ax_filt);
+      Ay_filt = AyRaw * alpha + ((1.0 - alpha) * Ay_filt);
+      Az_filt = AzRaw * alpha + ((1.0 - alpha) * Az_filt);
+
       /*
          Since the IMU has been set to use an accel tolerance of +-4g, raw values must be converted
          from LSB to g by dividing by 8192. According to the datasheet: https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf
       */
-      double Ax = AxRaw / 8192.0;
-      double Ay = AyRaw / 8192.0;
-      double Az = AzRaw / 8192.0;
+      double Ax = Ax_filt / 8192.0;
+      double Ay = Ay_filt / 8192.0;
+      double Az = Az_filt / 8192.0;
       
 
       // Store results in return array
@@ -158,16 +193,27 @@ class IMU {
     }
 
 
-    //  Read gyro data 
+    /**  
+     *   Read acceleration data
+     *   
+     *   Gx = Rotational acceleration about the x-axis
+     *    - Positive: pitching up
+     *    - Negative: pitching down
+     *    
+     *   Gy = Rotational acceleration about the y-axis
+     *    - Positive: rolling right
+     *    - Negative: rolling left
+     *    
+     *   Gz = Rotational acceleration about the z-axis
+     *    - Positive: yawing right
+     *    - Negative: yawing left
+     *    
+     */
     void getGyros(double* retArr)
     {
       /*
           Since the MPU6050 uses signed 16-bit numbers for all data registers,
           reading MSB and LSB from the the registers is done in the same way as getAccels()
-
-          positive Gz = turning left, negative Gz, turning right
-          positive Gy = roll right, negative Gy = roll left
-          positive Gx = pitch up, negative Gx = pitch down
       */
       int16_t GxRaw = (serialBus->readByte(mpuAddr, GxHighAddr) << 8) | serialBus->readByte(mpuAddr, GxLowAddr);  //  Read raw x acceleration
       int16_t GyRaw = (serialBus->readByte(mpuAddr, GyHighAddr) << 8) | serialBus->readByte(mpuAddr, GyLowAddr);  //  Read raw y acceleration
@@ -175,23 +221,24 @@ class IMU {
 
       // Apply a low pass filter to the signals to remove excess noise
       // Create filtered variables
-      double Fx = 0;
-      double Fy = 0;
-      double Fz = 0;
-      double alpha = 0.9;
+      double Gx_filt = 1;
+      double Gy_filt = 1;
+      double Gz_filt = 1;
+      double alpha = 0.99;
+      double epsilon = 1e-7;  //  For avoiding mulitplying by zero
     
       // Apply low-pass filter
-      Fx = GxRaw * alpha + ((1.0 - alpha) * Fx);
-      Fy = GyRaw * alpha + ((1.0 - alpha) * Fy);
-      Fz = GzRaw * alpha + ((1.0 - alpha) * Fz);
+      Gx_filt = GxRaw * alpha + ((1.0 - alpha) * Gx_filt);
+      Gy_filt = GyRaw * alpha + ((1.0 - alpha) * Gy_filt);
+      Gz_filt = GzRaw * alpha + ((1.0 - alpha) * Gz_filt);
       
       /*
        * According to the datasheet (https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf),
        * to convert from LSB -> deg/s at a range of +-500 deg/s. We must divide the raw values by 65.5
        */
-       double Gx = Fx / 65.5;
-       double Gy = Fy / 65.5;
-       double Gz = Fz / 65.5;
+       double Gx = Gx_filt / 65.5;
+       double Gy = Gy_filt / 65.5;
+       double Gz = Gz_filt / 65.5;
 
        retArr[0] = Gx;
        retArr[1] = Gy;
@@ -209,34 +256,20 @@ class IMU {
     }
 
 
-    // Get current pitch and roll
-    void getPitchYawRoll(double* retArr)
+    /**
+     * Compute pitch and roll from given accel values
+     * 
+     * accels = [Ax, Ay, Az]
+     * 
+     * Returns:
+     *  retArr = [pitch, roll]
+     */
+    void computePitchRoll(double* accels, double* retArr)
     {
-      // Compute current acceleration vector
-      double accels[3];
-      getAccels(accels);
-
-      // Compute current gyro forces
-      double gyros[3];
-      getGyros(gyros);
-
-      double Gz = gyros[2];
-
-      // Apply low-pass filter to X and Y. Filter lowest 10%
-      double alpha = 0.9;  //  Save highest 90% of the signal
-      double Fx = accels[0] * alpha + (0 * (1.0 - alpha));
-      double Fy = accels[1] * alpha + (0 * (1.0 - alpha));
-      double Fz = accels[2] * alpha + (0 * (1.0 - alpha));
-
-      // Compute pitch, yaw, and roll
-      double pitch = (atan2(Fy, Fz) * 180.0) / M_PI;
-      double roll = (atan2(Fx, sqrt(Fy*Fy+Fz*Fz)) * 180.0) / M_PI;
-      double yaw = ((Gz/500)*180.0)/M_PI;//(atan2(Fz*Fy,sqrt(Fx*Fx+Gz*Gz)) * 180.0) / M_PI;   // this is incorrect
-      
-      retArr[0] = pitch;
-      retArr[1] = yaw;
-      retArr[2] = roll;
+      retArr[0] = (atan2(accels[1], accels[2]) * 180.0) / M_PI;
+      retArr[1] = (atan2(accels[0], sqrt(accels[1]*accels[1]+accels[2]*accels[2])) * 180.0) / M_PI;
     }
+    
 
 
     // Poll values from mpu. Returns [Ax,Ay,Az,Gx,Gy,Gz]
@@ -273,6 +306,76 @@ class IMU {
 
       prevTimeStep = dt;
     }
+
+    // Poll values from IMU and store them in an IMU session
+    void poll()
+    {
+      // Read accel values from mpu registers
+      double accelArr[3];
+      getAccels(accelArr);
+
+      // Compute pitch and roll
+      double pitchRoll[2];
+      computePitchRoll(accelArr, pitchRoll);
+
+      // Struct for storing data
+      imu_vals_t data;
+      data.timepoint = millis() - session->getStartTime();
+
+      // Compute change in time since last measurement
+      unsigned long dt = (data.timepoint - session->getPrevTimepoint()) / 1000.0;
+         
+      // Update session derivatives
+      //heading += (gyroArr[2]/500) * dt;
+      session->velocity += (accelArr[1] * dt) * 32.17; // Convert to feet per second
+      session->distance += session->velocity * dt; // In feet
+
+      // Read gyro values from mpu registers
+      double gyroArr[3];
+      getGyros(gyroArr);
+
+      // Populate data struct and add to session
+      data.Ax = accelArr[0];
+      data.Ay = accelArr[1];
+      data.Az = accelArr[2];
+      data.Gx = gyroArr[0];
+      data.Gy = gyroArr[1];
+      data.Gz = gyroArr[2];
+      data.pitch = pitchRoll[0];
+      data.roll = pitchRoll[1];
+      data.velocity = session->velocity;
+      data.distance = session->distance;
+
+      // Ensure a valid measurement (MARV should never fly)
+      if(data.Az > 0)
+      {
+        // Add IMU metrics to list
+        session->push(data);
+  
+        // Increment total samples taken
+        session->samples++;
+      }
+    }
+
+
+    // Clear values used to integrate relative motion data
+    void clear()
+    {
+       // Reset variables
+       heading = 0;
+       velocity = 0;
+       distance = 0;
+       prevTimeStep = 1;
+       
+    }
+    
+
+    // Get IMU start time
+    unsigned long getStartTime()
+    {
+      return startTime;
+    }
+
 
     /*
        Print MPU configuration settings
