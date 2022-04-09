@@ -26,7 +26,6 @@ that may still include bugs or unfinished components.
 
 ### v0.0.3
 - A touch sensor has been added to allow for starting tasks
-- Added rear-facing ultrasonic sensor
 
 ### v0.0.2:
 - Added LCD1602A LCD Screen
