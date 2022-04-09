@@ -92,7 +92,6 @@ void alarm(int freq, int buzzer, double dur, int beeps, int led)
   }
 }
 
-
 // Clamp a variable to be within a specified range of values
 int clamp(int value, int minVal, int maxVal)
 {
@@ -110,27 +109,64 @@ int clamp(int value, int minVal, int maxVal)
 }
 
 
-// Apply a low-pass filter to the given x,y, and z values
-void lowPassFilter(double* forces, double alpha)
+// Apply a low pass filter to an array of doubles.
+void lowPassFilter(double *a, int n, double alpha)
 {
-  // Create filtered variables
-  double Fx = 0;
-  double Fy = 0;
-  double Fz = 0;
-
-  // Apply low-pass filter
-  Fx = forces[0] * alpha + ((1.0 - alpha) * Fx);
-  Fy = forces[1] * alpha + ((1.0 - alpha) * Fy);
-  Fz = forces[2] * alpha + ((1.0 - alpha) * Fz);
-
-  // Return filtered values to array
-  forces[0] = Fx;
-  forces[1] = Fy;
-  forces[2] = Fz;
+    int i;
+    double y = a[0];
+    for (i = 1; i < n; i++)
+    {
+        y = alpha * a[i] + (1 - alpha) * y;
+        a[i] = y;
+    }
 }
 
+//  Apply high pass filter to an array of doubles
+void highPassFilter(long *a, int n, double alpha)
+{
+    int i;
+    double y = a[0];
+    for (i = 1; i < n; i++)
+    {
+        y = alpha * a[i] + (1 - alpha) * y;
+        a[i] = a[i] - y;
+    }
+}
 
+// Sort an array of longs in ascending order.
+void sort(long *a, int n)
+{
+    int i, j;
+    long t;
+    for (i = 0; i < n - 1; i++)
+    {
+        for (j = i + 1; j < n; j++)
+        {
+            if (a[i] > a[j])
+            {
+                t = a[i];
+                a[i] = a[j];
+                a[j] = t;
+            }
+        }
+    }
+}
 
-
+// Find the index of the minimum value in an array of longs.
+int minIndex(long *a, int n)
+{
+    int i;
+    long minVal = a[0];
+    int minIndex = 0;
+    for (i = 1; i < n; i++)
+    {
+        if (a[i] < minVal)
+        {
+            minVal = a[i];
+            minIndex = i;
+        }
+    }
+    return minIndex;
+}
 
 #endif      //  End UTILS_H
