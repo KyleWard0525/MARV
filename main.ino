@@ -105,7 +105,7 @@ void setup() {
   pinMode(periphs.pirPin, INPUT);
 
   robot = new Marv(periphs, &lcdI2C_module);
-  Serial.println("\n\nEnd setup()\n");
+  Serial.println("\n\nSetup complete!\n");
 }
 
 void loop() {
@@ -115,7 +115,7 @@ void loop() {
     Serial.println("Start button pressed!");
     delay(250);
     //test();
-    Quiz17(robot);
+    lab7(robot);
   }
 
   
