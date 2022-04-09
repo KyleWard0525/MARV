@@ -34,8 +34,8 @@ class Motors {
     UltrasonicSensor* sonicSensor;                    //  Ultrasonic sensor interface
     double heading;                                   //  Current heading angle
     uint16_t buzzerPin = 2;                           //  GPIO pin for the buzzer
-    int defaultDriveSpeed = 40;                       //  Default driving speed
-    int defaultTurnSpeed = 75;                       //  Default turning speed
+    int driveSpeed = 40;                              //  Default driving speed
+    int turnSpeed = 75;                               //  Default turning speed
 
     //  Main constructor
     Motors(IMU* mpu, UltrasonicSensor* sonic, LCD* screen, pins_t pins) 
@@ -71,7 +71,7 @@ class Motors {
       double startHeading = heading;          //  Initial heading
       
       // Compute number of pulses needed
-      int nPulses = floor(dist_cm / cmPerPulse) + defaultDriveSpeed;
+      int nPulses = floor(dist_cm / cmPerPulse) + driveSpeed;
 
       // Reset motor encoder counts
       resetLeftEncoderCnt();
@@ -85,51 +85,27 @@ class Motors {
       rightMotor.enableMotor();
 
       // Set motor speed (start moving)
-      leftMotor.setRawSpeed(defaultDriveSpeed);
-      rightMotor.setRawSpeed(defaultDriveSpeed);
+      leftMotor.setRawSpeed(driveSpeed);
+      rightMotor.setRawSpeed(driveSpeed);
 
       //Serial.println("Pulses needed to travel " + String(dist_cm) + " cm = " + String(nPulses));
 
-      // Previous Z-axis rotational force
-      double prevGz = 0;
+      
 
      // Wait for motor encoder to read nPulses (distance traveled = dist_cm)
      while(getEncoderLeftCnt() < nPulses && getEncoderRightCnt() < nPulses)
      {
-         // Check forward sensors
-         monitorForwardSensors();
+        // Check if imu should be polled, in accordance with imu session
+        if((millis() - imu->session->getStartTime()) % imu->session->sampleRateMs == 0)
+        {
+         // Poll imu and save data in current imu session
+         imu->poll(); 
+        }
+        
+        // Check forward sensors
+        //monitorForwardSensors();
 
          delay(1);
-//
-//        // Poll IMU
-//        imu->poll(imuVals);
-//        delay(200);
-//
-//        // Compute timestep
-//        prevTimeStep = timestep;
-//        timestep = (micros() - prevTimeStep) / 1000000.0;
-//          
-//        // Update heading
-//        heading += (imuVals[5] - prevGz)*timestep;
-//
-//        // Check heading
-//        if(heading > startHeading + 2 || heading < startHeading -  2)
-//        {
-//          // Check direction of error
-//          if(heading < startHeading - 2)
-//          {
-//            // Off to the left, slow down right motor
-//            leftMotor.setSpeed(int(defaultDriveSpeed / 2));
-//          }
-//          else if(heading > startHeading + 2)
-//          {
-//            // Off to the left, slow down right motor
-//            rightMotor.setSpeed(int(defaultDriveSpeed / 2));
-//          }
-//        }
-//
-//        // Store Gz for next measurement
-//        prevGz = imuVals[5];
      }
      
       // Stop motors
@@ -178,10 +154,6 @@ class Motors {
     // Turn a given number of degrees (negative=left turn, positive=right turn)
     void turn(int nDeg)
     {
-      unsigned long timestep = 0;
-      unsigned long prevTimeStep = 0;
-      double imuVals[6];
-      
       // Error check
       if(nDeg < -359)
       {
@@ -218,34 +190,30 @@ class Motors {
         rightMotor.enableMotor();
 
         // Set motor speed (start moving)
-        leftMotor.setRawSpeed(defaultTurnSpeed);
-        rightMotor.setRawSpeed(defaultTurnSpeed);
-        
-        double prevGz = 0;
+        leftMotor.setRawSpeed(turnSpeed);
+        rightMotor.setRawSpeed(turnSpeed);
 
         // Wait for motor encoder to read nPulses
         while(getEncoderRightCnt() < nPulses || getEncoderRightCnt() < nPulses)
         {
-          // Check forward facing sensors
-          monitorForwardSensors();
+          // Check if imu should be polled, in accordance with imu session
+          if((millis() - imu->session->getStartTime()) % imu->session->sampleRateMs == 0)
+          {
+           // Poll imu and save data in current imu session
+           imu->poll(); 
+          }
           
-//          imu->poll(imuVals);
-//          delay(100);
-//
-//          prevTimeStep = timestep;
-//          timestep = (micros() - prevTimeStep) / 1000000.0;
-//          
-//          // Update heading
-//          heading += (imuVals[5] - prevGz)*timestep;
+          // Check forward facing sensors
+          //monitorForwardSensors();
+
           
           if(getEncoderLeftCnt() % (nPulses/2) == 0)
           {
-            leftMotor.setSpeed(int(defaultTurnSpeed/2));
-            rightMotor.setSpeed(int(defaultTurnSpeed/2));
+            leftMotor.setSpeed(int(turnSpeed/2));
+            rightMotor.setSpeed(int(turnSpeed/2));
           }
           
           delay(1);
-//          prevGz = imuVals[5];
         }
 
         // Stop motors
@@ -267,33 +235,29 @@ class Motors {
         rightMotor.enableMotor();
 
         // Set motor speed (start moving)
-        leftMotor.setRawSpeed(defaultTurnSpeed);
-        rightMotor.setRawSpeed(defaultTurnSpeed);
-
-        double prevGz = 0;
+        leftMotor.setRawSpeed(turnSpeed);
+        rightMotor.setRawSpeed(turnSpeed);
 
         // Wait for motor encoder to read nPulses
         while(getEncoderLeftCnt() < nPulses || getEncoderRightCnt() < nPulses)
         {
-          // Check forward facing sensors
-          monitorForwardSensors();
+          // Check if imu should be polled, in accordance with imu session
+          if((millis() - imu->session->getStartTime()) % imu->session->sampleRateMs == 0)
+          {
+           // Poll imu and save data in current imu session
+           imu->poll(); 
+          }
           
-//          imu->poll(imuVals);
-//          delay(200);
-//          
-//          prevTimeStep = timestep;
-//          timestep = (micros() - prevTimeStep) / 1000000.0;
-//          
-//          // Update heading
-//          heading += (imuVals[5] - prevGz)*timestep;
+          // Check forward facing sensors
+          //monitorForwardSensors();
+          
           
           if(getEncoderLeftCnt() % (nPulses/2) == 0)
           {
-            leftMotor.setSpeed(int(defaultTurnSpeed/2));
-            rightMotor.setSpeed(int(defaultTurnSpeed/2));
+            leftMotor.setSpeed(int(turnSpeed/2));
+            rightMotor.setSpeed(int(turnSpeed/2));
           }
           delay(1);
-//          prevGz = imuVals[5];
          
         }
 
