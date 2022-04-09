@@ -41,7 +41,7 @@ class Bumpers {
     {
       // Set status led
       setStatusLed(0);
-
+      
       // Play beep
       beep(collisionFreq, buzzer);
     }
