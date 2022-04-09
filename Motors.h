@@ -34,8 +34,8 @@ class Motors {
     UltrasonicSensor* sonicSensor;                    //  Ultrasonic sensor interface
     double heading;                                   //  Current heading angle
     uint16_t buzzerPin = 2;                           //  GPIO pin for the buzzer
-    int defaultDriveSpeed = 15;               //  Default driving speed
-    int defaultTurnSpeed = 40;                //  Default turning speed
+    int defaultDriveSpeed = 40;                       //  Default driving speed
+    int defaultTurnSpeed = 75;                       //  Default turning speed
 
     //  Main constructor
     Motors(IMU* mpu, UltrasonicSensor* sonic, LCD* screen, pins_t pins) 
@@ -85,10 +85,10 @@ class Motors {
       rightMotor.enableMotor();
 
       // Set motor speed (start moving)
-      leftMotor.setSpeed(defaultDriveSpeed);
-      rightMotor.setSpeed(defaultDriveSpeed);
+      leftMotor.setRawSpeed(defaultDriveSpeed);
+      rightMotor.setRawSpeed(defaultDriveSpeed);
 
-      Serial.println("Pulses needed to travel " + String(dist_cm) + " cm = " + String(nPulses));
+      //Serial.println("Pulses needed to travel " + String(dist_cm) + " cm = " + String(nPulses));
 
       // Previous Z-axis rotational force
       double prevGz = 0;
@@ -136,7 +136,7 @@ class Motors {
       rightMotor.disableMotor();
       leftMotor.disableMotor();
       
-      Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
+      //Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
     }
 
     void reverse(double dist_cm)
@@ -156,8 +156,8 @@ class Motors {
       rightMotor.enableMotor();
 
       // Set motor speed (start moving)
-      leftMotor.setSpeed(40);
-      rightMotor.setSpeed(40);
+      leftMotor.setRawSpeed(120);
+      rightMotor.setRawSpeed(120);
 
 
      // Wait for motor encoder to read nPulses (distance traveled = dist_cm)
@@ -171,8 +171,8 @@ class Motors {
       leftMotor.disableMotor();
       rightMotor.disableMotor();
       
-      Serial.println("Pulses needed to travel " + String(dist_cm) + "cm = " + String(nPulses));
-      Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
+      //Serial.println("Pulses needed to travel " + String(dist_cm) + "cm = " + String(nPulses));
+      //Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
     }
 
     // Turn a given number of degrees (negative=left turn, positive=right turn)
@@ -204,7 +204,7 @@ class Motors {
       resetLeftEncoderCnt();
       resetRightEncoderCnt();
 
-      Serial.println("\nNumber of pulses to turn " + String(nDeg) + " degrees = " + String(nPulses));
+      //Serial.println("\nNumber of pulses to turn " + String(nDeg) + " degrees = " + String(nPulses));
       
       // Check direction 
       if(nDeg < 0)
@@ -218,8 +218,8 @@ class Motors {
         rightMotor.enableMotor();
 
         // Set motor speed (start moving)
-        leftMotor.setSpeed(defaultTurnSpeed);
-        rightMotor.setSpeed(defaultTurnSpeed);
+        leftMotor.setRawSpeed(defaultTurnSpeed);
+        rightMotor.setRawSpeed(defaultTurnSpeed);
         
         double prevGz = 0;
 
@@ -238,8 +238,13 @@ class Motors {
 //          // Update heading
 //          heading += (imuVals[5] - prevGz)*timestep;
           
+          if(getEncoderLeftCnt() % (nPulses/2) == 0)
+          {
+            leftMotor.setSpeed(int(defaultTurnSpeed/2));
+            rightMotor.setSpeed(int(defaultTurnSpeed/2));
+          }
           
-          delay(100);
+          delay(1);
 //          prevGz = imuVals[5];
         }
 
@@ -247,8 +252,8 @@ class Motors {
         leftMotor.disableMotor();
         rightMotor.disableMotor();
         
-        Serial.println("Pulses needed to turn " + String(nDeg) + " degrees = " + String(nPulses));
-        Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
+        //Serial.println("Pulses needed to turn " + String(nDeg) + " degrees = " + String(nPulses));
+        //Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
       }
       else if(nDeg > 0)
       {
@@ -262,8 +267,8 @@ class Motors {
         rightMotor.enableMotor();
 
         // Set motor speed (start moving)
-        leftMotor.setSpeed(defaultTurnSpeed);
-        rightMotor.setSpeed(defaultTurnSpeed);
+        leftMotor.setRawSpeed(defaultTurnSpeed);
+        rightMotor.setRawSpeed(defaultTurnSpeed);
 
         double prevGz = 0;
 
@@ -282,12 +287,12 @@ class Motors {
 //          // Update heading
 //          heading += (imuVals[5] - prevGz)*timestep;
           
-//          if(getEncoderLeftCnt() % (nPulses/2) == 0)
-//          {
-//            leftMotor.setSpeed(int(defaultTurnSpeed/2));
-//            rightMotor.setSpeed(int(defaultTurnSpeed/2));
-//          }
-          delay(100);
+          if(getEncoderLeftCnt() % (nPulses/2) == 0)
+          {
+            leftMotor.setSpeed(int(defaultTurnSpeed/2));
+            rightMotor.setSpeed(int(defaultTurnSpeed/2));
+          }
+          delay(1);
 //          prevGz = imuVals[5];
          
         }
@@ -296,8 +301,8 @@ class Motors {
         leftMotor.disableMotor();
         rightMotor.disableMotor();
         
-        Serial.println("Pulses needed to turn " + String(nDeg) + " degrees = " + String(nPulses));
-        Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
+        //Serial.println("Pulses needed to turn " + String(nDeg) + " degrees = " + String(nPulses));
+        //Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
       }
     }
 
@@ -314,7 +319,9 @@ class Motors {
           bumpSensors.alert(buzzerPin);
 
           // Check if anyone has helped marv in the alloted time
-          reverse(5); // Reverse ~5cm
+          //reverse(5); // Reverse ~5cm
+          rightMotor.disableMotor();
+          leftMotor.disableMotor();
         }
       } else {
         bumpSensors.setStatusLed(1);
@@ -326,15 +333,8 @@ class Motors {
     void monitorForwardSensors()
     {
       // Check PIR Sensor
-//      if(digitalRead(periphs.pirPin) == 1)
-//      {
-//        lcd->showMessage("Heat Signature", -1, 0, 0);
-//        lcd->showMessage("Detected!", -1, 4, 1);
-//      }
-//      else {
-//        lcd->off();
-//      }
 
+      // Check bumpers
       checkBumpers();
       long dist = sonicSensor->measure();
       
