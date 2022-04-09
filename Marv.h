@@ -121,6 +121,7 @@ class Marv {
 
       // Initialize motors
       motors = new Motors(imu, frontSonicSensor, lcd, periphs);
+      Serial.println("Motors initialized.");
 
       // Set MARV's initial internal states and variables
       emotions.feeling = emotions.Idle;
