@@ -51,12 +51,11 @@ struct imu_vals_t {
   // Print imu vals
   void to_string()
   {
-    Serial.println("<IMU_DATA>");
-    Serial.print("Time=" + String(timepoint/1000.0) + "s,");
-    Serial.print("Ax=" + String(Ax) + "g,Ay=" + String(Ay) + "g,Az=" + String(Az) + "g,");
-    Serial.print("Gx=" + String(Gx) + "deg/s,Gy=" + String(Gy) + "deg/s,Gz=" + String(Gz) + "deg/s,");
-    Serial.print("Pitch=" + String(pitch) + "deg,Roll=" + String(roll) + "deg,");
-    Serial.print("Velocity=" + String(velocity) + "ft/s,Distance=" + String(distance) + "ft.");
+    Serial.print("Time=" + String(timepoint/1000.0) + ",");
+    Serial.print("Ax=" + String(Ax) + ",Ay=" + String(Ay) + ",Az=" + String(Az) + ",");
+    Serial.print("Gx=" + String(Gx) + ",Gy=" + String(Gy) + ",Gz=" + String(Gz) + ",");
+    Serial.print("Pitch=" + String(pitch) + ",Roll=" + String(roll) + ",");
+    Serial.println("Velocity=" + String(velocity) + ",Distance=" + String(distance));
   }
 };
 
