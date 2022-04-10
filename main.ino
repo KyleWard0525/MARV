@@ -13,60 +13,13 @@
 #include "LCD.h"
 #include "Labs.h"
 #include "Telemetry.h"
+#include "Tests.h"
 
 Marv* robot;                  //  Main robot driver
 Servo servo;                  //  Servo motor object
 pins_t periphs;               //  Peripheral pins     
 
-uint32_t maxItrs = 1;
-uint8_t itrs = 0;
 
-void testIMU_Session()
-{
-  test();
-  delay(500);
-  // Create an IMU session
-  IMU_Session session(500);
-  session.sampleRateMs = 25;  //  ms betweeen samples
-
-  // Set IMU session
-  robot->imu->session = &session;
-  
-  unsigned long start = millis();
-  
-  // Poll IMU and print result stored in imu session data
-  robot->motors->driveSpeed = 50;
-
-  // Drive a square
-  int dist = 30;
-  for(int i = 0; i < 4; i++)
-  {
-    robot->motors->forward(dist);
-    delay(500);
-    robot->motors->turn(90);
-    delay(500);
-  }
-
-  // Write measurements over serial
-  Serial.println("<IMU_DATA>");
-  for(int i = 0; i < session.samples; i++)
-  {
-      session.data[i].to_string();
-  }
-  Serial.println("<END>");
-}
-
-// For testing new functionality
-void test()
-{
-  double arr[3];
-  
-  robot->imu->getAccels(arr);
-  Serial.print("\nAx = " + String(arr[0]) + "g");
-  Serial.print("\tAy = " + String(arr[1]) + "g");
-  Serial.print("\tAz = " + String(arr[2]) + "g\n");
-  delay(1000);
-}
 
 void setup() {  
   // Setup serial output
@@ -95,6 +48,8 @@ void setup() {
   periphs.pirPin = 46;            //  P6_2
   periphs.servoPin = 67;          //  P9_7
 
+
+  Serial.println("100Hz = " + String(hertzToMilliseconds(100)) + "ms");
 
   // Setup servo pin (Must be initialized here, before other setup)
   servo.attach(periphs.servoPin);
@@ -138,7 +93,7 @@ void loop() {
   {
     Serial.println("Start button pressed!");
     delay(250);
-    testIMU_Session();
+    testIMU_SessionResize(robot);
   }
 
   
