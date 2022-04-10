@@ -206,13 +206,6 @@ class Motors {
           // Check forward facing sensors
           //monitorForwardSensors();
 
-          
-          if(getEncoderLeftCnt() % (nPulses/2) == 0)
-          {
-            leftMotor.setSpeed(int(turnSpeed/2));
-            rightMotor.setSpeed(int(turnSpeed/2));
-          }
-          
           delay(1);
         }
 
@@ -251,12 +244,6 @@ class Motors {
           // Check forward facing sensors
           //monitorForwardSensors();
           
-          
-          if(getEncoderLeftCnt() % (nPulses/2) == 0)
-          {
-            leftMotor.setSpeed(int(turnSpeed/2));
-            rightMotor.setSpeed(int(turnSpeed/2));
-          }
           delay(1);
          
         }
@@ -305,20 +292,6 @@ class Motors {
       // Check if object is within forward buffer zone
       if(dist <= sonicSensor->offsetDist + sonicSensor->bufferDist)
       {
-        //Check if an ultrasonic measurement event has started
-        if(sonicSensor->avoids == 0)
-        {
-          // Start measurement event
-          sonicSensor->eventStart = millis();
-        }
-        // Increment collisions avoided
-        sonicSensor->avoids++;
-        // Check number of avoidances (i.e. is an object still following MARV)
-        if(sonicSensor->avoids >= sonicSensor->warningLimit)
-        {
-          // Play warning
-        }
-
         // Reverse away from the object
         reverse(5);
       }
