@@ -54,13 +54,11 @@ def plot_acceleration(filename='accelerationPlots.png'):
     axs[0].plot(x_axis, imu_data['Ax'])
     axs[0].set_title('Lateral Acceleration')
     axs[0].set_ylabel('Ax (g)')
-    axs[0].set_xlabel('Time (s)')
     
     # Plot longitudinal acceleration
     axs[1].plot(x_axis, imu_data['Ay'])
     axs[1].set_title('Longitudinal Acceleration')
     axs[1].set_ylabel('Ay (g)')
-    axs[1].set_xlabel('Time (s)')
     
     # Plot vertical acceleration
     axs[2].plot(x_axis, imu_data['Az'])
