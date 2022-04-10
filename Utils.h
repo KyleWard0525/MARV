@@ -197,4 +197,16 @@ int minIndex(long *a, int n)
     return minIndex;
 }
 
+// Convert Hertz to milliseconds
+double hertzToMilliseconds(int hertz)
+{
+  return 1000.0 / hertz;
+}
+
+// Convert milliseconds to Hertz
+double millisecondsToHertz(int milliseconds)
+{
+  return (1.0/milliseconds) * 1000.0;
+}
+
 #endif      //  End UTILS_H
