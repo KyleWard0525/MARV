@@ -24,10 +24,10 @@ uint8_t itrs = 0;
 void testIMU_Session()
 {
   test();
-  delay(1500);
+  delay(500);
   // Create an IMU session
-  IMU_Session session(128);
-  session.sampleRateMs = 10;  //  10ms betweeen samples
+  IMU_Session session(500);
+  session.sampleRateMs = 25;  //  ms betweeen samples
 
   // Set IMU session
   robot->imu->session = &session;
@@ -35,16 +35,25 @@ void testIMU_Session()
   unsigned long start = millis();
   
   // Poll IMU and print result stored in imu session data
-  robot->motors->driveSpeed = 100;
-  robot->motors->forward(15);
+  robot->motors->driveSpeed = 50;
 
-  // Print measurements
+  // Drive a square
+  int dist = 30;
+  for(int i = 0; i < 4; i++)
+  {
+    robot->motors->forward(dist);
+    delay(500);
+    robot->motors->turn(90);
+    delay(500);
+  }
+
+  // Write measurements over serial
+  Serial.println("<IMU_DATA>");
   for(int i = 0; i < session.samples; i++)
   {
       session.data[i].to_string();
   }
-
-  Serial.println("Samples taken in " + String((millis()-start)/1000.0) + "s: " + String(session.samples)); 
+  Serial.println("<END>");
 }
 
 // For testing new functionality
@@ -61,7 +70,7 @@ void test()
 
 void setup() {  
   // Setup serial output
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Wait for serial connection to open
   while(!Serial)
