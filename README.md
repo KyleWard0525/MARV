@@ -21,12 +21,19 @@ All of the software is being written in C/C++ using the Energia IDE
 ***Note:*** These "versions" are not full updates/releases. They are small incremental updates
 that may still include bugs or unfinished components.
 
-![MARV v0.0.2](images/Marv002_side.jpg)
-***MARV v0.0.2 shown above***
+
 
 ### v0.0.3
 - A touch sensor has been added to allow for starting tasks
+- Added Telemetry.h for tracking and storing vehicle telemetry metrics
+- Added SerialListener.py for receiving data from the robot over USB
+- Added ProcessSerialOutput.py for post-processing telemetry data
+- Added forward servo
+- Mounted ultrasonic sensor to front servo for environmental scanning and object detection
 
+
+![MARV v0.0.2](images/Marv002_side.jpg)
+***MARV v0.0.2 shown above***
 ### v0.0.2:
 - Added LCD1602A LCD Screen
 - Added I2C.h to interface with MARV's onboard I2C channels for read/write operations to device registers
@@ -46,7 +53,5 @@ that may still include bugs or unfinished components.
 - Morse code communication through LED blinks and buzzer beeps
 
 ## Upcoming Updates:
-- Collision avoidance
 - Follow mode (robot follows the user around)
 - Use measurements from IMU to determine orientation in order to get out of a bad spot
-- Add oscilating ultrasonic sensor assembly using stepper motor and 3 ultrasonic sensors in a triangle configuration in attempt to create a 3D map of the robot's current environment using ultrasound
