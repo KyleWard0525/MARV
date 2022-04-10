@@ -300,7 +300,7 @@ class IMU {
       unsigned long dt = (millis() - prevTimeStep) / 1000;
          
       // Update derivatives
-      heading += (gyroArr[2]/500) * dt;
+      //heading += (gyroArr[2]/500) * dt;
       velocity += accelArr[1] * dt;
       distance += velocity * dt;
 
