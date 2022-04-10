@@ -32,6 +32,7 @@ class IMU_Session {
     unsigned long endTime;                    //  End time for the session
     unsigned long prevTimepoint;              //  Timepoint of last measurement
     uint32_t currIdx;                         //  Current measurement index
+    uint32_t capacity;                        //  Number of elements that can be stored in data
 
   public:
     uint32_t measurements;                    //  Number of measurements made/will be made
@@ -53,6 +54,7 @@ class IMU_Session {
       distance = 0;
       samples = 0;
       prevTimepoint = 1;
+      capacity = measurements;
     }
 
     // Add IMU data to the end of the data list
@@ -70,14 +72,43 @@ class IMU_Session {
       }
       // List is full
       else {
-        return;
+        // Resize list and try again
+        resize();
+        currIdx++;
+        data[currIdx] = imu_data;
       }
     }
 
-    // Return whether or not session list is full
-    bool full()
+    // Resize internal data array
+    void resize()
     {
-      return currIdx == measurements;
+      uint32_t startSize = capacity;            //  Get size of data
+      uint32_t newSize = startSize * 2;         //  Compute new array size
+
+      
+
+      // Create new, larger array
+      imu_vals_t newData[newSize];
+
+      // Iterate through data and store in newData
+      for(int i = 0; i < startSize; i++)
+      {
+        // Transfer data from old list to new list
+        newData[i] = data[i];
+      }
+
+      // Set internal data array to newly sized array
+      this->data = newData;
+
+      // Update capacity
+      capacity = newSize;
+      Serial.println("\nIMU_Session resized to hold " + String(capacity) + " samples");
+    }
+
+    // Return length of the list
+    uint32_t getCapacity()
+    {
+      return capacity;
     }
 
     // Get start time
