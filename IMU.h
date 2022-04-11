@@ -164,26 +164,14 @@ class IMU {
       int16_t AyRaw = (serialBus->readByte(mpuAddr, AyHighAddr) << 8) | serialBus->readByte(mpuAddr, AyLowAddr);  //  Read raw y acceleration
       int16_t AzRaw = (serialBus->readByte(mpuAddr, AzHighAddr) << 8) | serialBus->readByte(mpuAddr, AzLowAddr);  //  Read raw z acceleration
 
-      // Apply a low pass filter to the signals to remove excess noise
-      // Create filtered variables
-      double Ax_filt = 1;
-      double Ay_filt = 1;
-      double Az_filt = 1;
-      double alpha = 0.995;
-      double epsilon = 1e-7;  //  For avoiding mulitplying by zero
-    
-      // Apply low-pass filter
-      Ax_filt = AxRaw * alpha + ((1.0 - alpha) * Ax_filt);
-      Ay_filt = AyRaw * alpha + ((1.0 - alpha) * Ay_filt);
-      Az_filt = AzRaw * alpha + ((1.0 - alpha) * Az_filt);
 
       /*
          Since the IMU has been set to use an accel tolerance of +-4g, raw values must be converted
          from LSB to g by dividing by 8192. According to the datasheet: https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf
       */
-      double Ax = Ax_filt / 8192.0;
-      double Ay = Ay_filt / 8192.0;
-      double Az = Az_filt / 8192.0;
+      double Ax = AxRaw / 8192.0;
+      double Ay = AyRaw / 8192.0;
+      double Az = AzRaw / 8192.0;
       
 
       // Store results in return array
@@ -218,27 +206,14 @@ class IMU {
       int16_t GxRaw = (serialBus->readByte(mpuAddr, GxHighAddr) << 8) | serialBus->readByte(mpuAddr, GxLowAddr);  //  Read raw x acceleration
       int16_t GyRaw = (serialBus->readByte(mpuAddr, GyHighAddr) << 8) | serialBus->readByte(mpuAddr, GyLowAddr);  //  Read raw y acceleration
       int16_t GzRaw = (serialBus->readByte(mpuAddr, GzHighAddr) << 8) | serialBus->readByte(mpuAddr, GzLowAddr);  //  Read raw z acceleration
-
-      // Apply a low pass filter to the signals to remove excess noise
-      // Create filtered variables
-      double Gx_filt = 1;
-      double Gy_filt = 1;
-      double Gz_filt = 1;
-      double alpha = 0.99;
-      double epsilon = 1e-7;  //  For avoiding mulitplying by zero
-    
-      // Apply low-pass filter
-      Gx_filt = GxRaw * alpha + ((1.0 - alpha) * Gx_filt);
-      Gy_filt = GyRaw * alpha + ((1.0 - alpha) * Gy_filt);
-      Gz_filt = GzRaw * alpha + ((1.0 - alpha) * Gz_filt);
       
       /*
        * According to the datasheet (https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf),
        * to convert from LSB -> deg/s at a range of +-500 deg/s. We must divide the raw values by 65.5
        */
-       double Gx = Gx_filt / 65.5;
-       double Gy = Gy_filt / 65.5;
-       double Gz = Gz_filt / 65.5;
+       double Gx = GxRaw / 65.5;
+       double Gy = GyRaw / 65.5;
+       double Gz = GzRaw / 65.5;
 
        retArr[0] = Gx;
        retArr[1] = Gy;
