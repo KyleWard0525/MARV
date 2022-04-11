@@ -21,11 +21,26 @@ void testIMU(Marv* robot)
   delay(1000);
 }
 
-void straightLineTest(Marv* robot, double dist, uint32_t pollDelayMs)
+void straightLineTest(Marv* robot, double dist, uint32_t sampleRateHz)
 {
   // Create an IMU session and set IMU sample rate
   IMU_Session session(500);
-  session.sampleRateMs = 20;  //  ms betweeen samples (50Hz)
+  session.sampleRateMs = hertzToMilliseconds(sampleRateHz);  //  Convert Hz to milliseconds
+
+  // Set IMU session
+  robot->imu->session = &session;
+
+  // Move
+  robot->motors->forward(dist);
+
+  // Write measurements over serial
+  Serial.println("<IMU_DATA>");
+  Serial.println("sample_rate=" + String(sampleRateHz));
+  for(int i = 0; i < session.samples; i++)
+  {
+      session.data[i].to_string();
+  }
+  Serial.println("<END>");
 }
 
 // Test storing data in an IMU session
@@ -71,7 +86,8 @@ void testIMU_SessionResize(Marv* robot)
 {
   // Create IMU session
   IMU_Session session(2);
-  uint32_t startLen = session.getCapacity();
+  uint32_t startLen = session.szData;
+  
   Serial.println("\nin Tests.testIMUSessionResize(): Session start size: " + String(startLen));
 
   // Set robot's current IMU session
@@ -81,13 +97,31 @@ void testIMU_SessionResize(Marv* robot)
   {
     robot->imu->poll();
     delay(50);
-    Serial.println("Session size: " + String(session.getCapacity()));
-  }
-
-  
+    Serial.println("Session size: " + String(session.szData));
+  } 
 }
 
+// Test the imu_vals_t struct
+void testStruct_IMUVals(Marv* robot)
+{
+  // Create an IMU session
+  IMU_Session session(1);
+  robot->imu->session = &session;
 
+  // Poll imu
+  robot->imu->poll();
+
+  // Get data from session
+  imu_vals_t measurement = robot->imu->session->at(0);
+  
+  double rawAccels[3];
+  measurement.getRawAccels(rawAccels);
+  double rawGyros[3];
+  measurement.getRawGyros(rawGyros);
+
+
+  Serial.println("\n");
+}
 
 
 
