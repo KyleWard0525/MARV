@@ -11,7 +11,9 @@
 LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
 
 // Create a custom type definition for MARV's internal functions
-typedef void (*marv_func_t)();
+typedef void (*marv_func_t)(void*);
+
+
 
 // Struct for storing peripherial pins
 struct pins_t {
@@ -57,8 +59,24 @@ struct imu_vals_t {
     Serial.print("Pitch=" + String(pitch) + ",Roll=" + String(roll) + ",");
     Serial.println("Velocity=" + String(velocity) + ",Distance=" + String(distance));
   }
-};
 
+  // Return raw acceleration vector
+  void getRawAccels(double* retArr)
+  {
+    retArr[0] = Ax;
+    retArr[1] = Ay;
+    retArr[2] = Az;
+  }
+
+  // Return raw gyro vector
+  void getRawGyros(double* retArr)
+  {
+    retArr[0] = Gx;
+    retArr[1] = Gy;
+    retArr[2] = Gz;
+  }
+
+};
 
 // Play a beep sound to the buzzer at a given frequency
 void beep(int freq, int buzzer)
@@ -136,30 +154,23 @@ int clamp(int value, int minVal, int maxVal)
   }
 }
 
-
 // Apply a low pass filter to an array of doubles.
-void lowPassFilter(double *a, int n, double alpha)
+void lowPassFilter(double *arr, int len, double alpha)
 {
-    int i;
-    double y = a[0];
-    for (i = 1; i < n; i++)
+    double y = arr[0];
+    for (uint32_t i = 1; i < len; i++)
     {
-        y = alpha * a[i] + (1 - alpha) * y;
-        a[i] = y;
+        y = alpha * arr[i] + (1.0 - alpha) * arr[i-1];
+        arr[i] = y;
     }
 }
 
-//  Apply high pass filter to an array of doubles
-void highPassFilter(long *a, int n, double alpha)
+// Perform a range check on a value. 0 = not in range, 1 = in range
+int range_check(long val, long minVal, long maxVal)
 {
-    int i;
-    double y = a[0];
-    for (i = 1; i < n; i++)
-    {
-        y = alpha * a[i] + (1 - alpha) * y;
-        a[i] = a[i] - y;
-    }
+  return (val >= minVal) && (val <= maxVal);
 }
+
 
 // Sort an array of longs in ascending order.
 void sort(long *a, int n)
@@ -208,5 +219,23 @@ double millisecondsToHertz(int milliseconds)
 {
   return (1.0/milliseconds) * 1000.0;
 }
+
+// Print an array of values
+void printArray(double* vals, uint32_t len)
+{
+  Serial.print("{");
+
+  for(int i = 0; i < len; i++)
+  {
+    if(i != len-1)
+    {
+      Serial.print(String(vals[i]) + ", ");
+    }
+    else {
+      Serial.print(String(vals[i]) + "} \n");
+    }
+  }
+}
+
 
 #endif      //  End UTILS_H
