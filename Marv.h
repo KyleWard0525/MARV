@@ -98,7 +98,6 @@ class Marv {
 
       // Initialize LCD screen
       lcd = new LCD(lcdI2C);
-      lcd->showMessage("Booting...", -1, lcd->screenPadding, 0);   //  Show boot message
       Serial.println("LCD initialized.");
       
       // Initialize morse object
