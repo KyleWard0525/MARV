@@ -135,11 +135,33 @@ class Marv {
     {
       // Show message on lcd screen
       lcd->resetScreen();
-      lcd->showMessage("Ready!", 1500, 5, 0);
+      lcd->showMessage("Ready!", 1000, 5, 0);
 
       // Play 'ready' beep
       morse->i(); 
     }
+
+    
+  // Perform an environmental sweep (assuming the sonic sensor is mounted on top of the servo
+  void servoSweep(uint16_t startPos, uint16_t endPos, uint16_t stepSize, long* outputs, uint32_t delayMs=100)
+  {
+    // Array index (since the loop is using values that may not be from 0-length of array)
+    uint16_t arrIdx = 0;
+    
+    // Loop through specified sweep range
+    for(uint16_t i = startPos; i <= endPos; i++)
+    {
+      // Move servo and store measurements in return array (outputs)
+      servo.write(i);
+      delay(delayMs/2);
+      outputs[arrIdx] = frontSonicSensor->measure();
+      delay(delayMs/2);
+      arrIdx++;
+    }
+
+    // Return servo to face forward
+    servo.write(90);
+  }
 
 };
 
