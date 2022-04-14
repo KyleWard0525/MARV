@@ -13,8 +13,6 @@ LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
 // Create a custom type definition for MARV's internal functions
 typedef void (*marv_func_t)(void*);
 
-
-
 // Struct for storing peripherial pins
 struct pins_t {
   uint16_t buzzer;          //  Passive buzzer
@@ -220,8 +218,14 @@ double millisecondsToHertz(int milliseconds)
   return (1.0/milliseconds) * 1000.0;
 }
 
+// Convert servo position to turn angle
+int servoPosToTurnAngle(int servoPos)
+{
+  return map(servoPos, 0, 180, 90, -90);
+}
+
 // Print an array of values
-void printArray(double* vals, uint32_t len)
+void printArray(long* vals, uint32_t len)
 {
   Serial.print("{");
 
