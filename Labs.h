@@ -100,7 +100,7 @@ void lab6(Marv* robot)
 
   String output = "Distances: ";
 
-  robot->motors->defaultTurnSpeed = 10;
+  robot->motors->turnSpeed = 10;
   
   // Loop through each angle
   for(int i = 0; i < 7; i++)
@@ -136,7 +136,7 @@ void lab6(Marv* robot)
     closestIdx += 1;
   }
   delay(1500);
-  robot->motors->defaultTurnSpeed = 25;
+  robot->motors->turnSpeed = 25;
   // Turn back to be facing wall at the closest point
   robot->motors->turn(nDeg-closestIdx);
   delay(1500);
@@ -245,7 +245,7 @@ void Quiz17(Marv* robot)
     robot->servo.write(minIdx1);
     
     // Slow motors for more precise turn (?)
-    robot->motors->defaultTurnSpeed = 40;
+    robot->motors->turnSpeed = 40;
     delay(1000);
 
     // Check which quadrant closest object is in
@@ -278,7 +278,7 @@ void Quiz17(Marv* robot)
     robot->servo.write(minIdx2);
 
     // Slow motors for more precise turn (?)
-    robot->motors->defaultTurnSpeed = 40;
+    robot->motors->turnSpeed = 40;
     delay(1000);
 
     // Check which quadrant closest object is in
@@ -307,7 +307,85 @@ void Quiz17(Marv* robot)
   // Move forward until robot touches the wall
   robot->motors->forward(minDist);
  }
- 
+
+
+// Struct for storing sweep data
+struct sweep_t {
+  int distanceTraveled;
+  long measurements[180];
+};
+
+/**
+ * Lab 8 Part 1: 
+ * 
+ * The robot will travel down a hallway (arena) which is 2.4m wide and 
+ * 3m long. 
+ * 
+ * There will be 3 30cm^3 boxes placed along the path on either side.
+ * Every 20cm, stop and sweep the servo and sonic sensor 180deg and store measurements 
+ * 
+ * These measurements will later be put into the report in the form of a table
+ */
+void lab8Part1(Marv* robot)
+{
+  int totalDist = 3000; //  3m
+  int measureInc = 20;  // Increments of 20cm between measurements
+
+  // Divide the total path into sections relative to the measurement interval
+  int sections = totalDist / measureInc;
+
+  // Create an array of sweeps to store all measurement data
+  sweep_t sweeps[sections];
+
+  // TODO: Make an initial sweep before moving
+
+
+  // TODO: Loop through all the sections of the hallway, measuring and storing data every 20cm
+  
+}
+
+/**
+ * Lab 8 Part 2: 
+ * 
+ * The robot will travel down a hallway (arena) which is 2.4m wide and 
+ * 3m long. 
+ * 
+ * There will be 3 30cm^3 boxes placed along the path on either side.
+ * Every 20cm, stop and sweep the servo and sonic sensor 180deg and store measurements 
+ * 
+ * When the robot reaches the end of the hallway (3 meters), it should: 
+    1. Rotate the robot in place 180-degrees, 
+    2.  turn the servo to point forward, 
+    3.  travel back down the hallway  
+    4.  while returning to the starting point, do the following: 
+    a.  stop next to each obstacle 
+    b.  turn the servo towards the object 
+    c.  wait 3 seconds 
+    d.  turn the servo forward 
+    e.  start moving again towards the starting point 
+ */
+void lab8Part2(Marv* robot)
+{
+  int totalDist = 3000; //  3m
+  int measureInc = 20;  // Increments of 20cm between measurements
+
+  // Divide the total path into sections relative to the measurement interval
+  int sections = totalDist / measureInc;
+
+  // Create an array of sweeps to store all measurement data
+  sweep_t sweeps[sections];
+
+  // TODO: Make an initial sweep before moving
+
+  // TODO: Find distance to wall on the left and right
+
+  // TODO: Loop through all the sections of the hallway, measuring and storing data every 20cm
+
+  // TODO: Split measurements into left and right side (right = measurements[0:89], left = measurements[90:179])
+
+  // TODO: Search for objects on the left and right side and store their location data
+}
+
 
 /**
  * Technically this is Quiz 14 but its basically a lab
