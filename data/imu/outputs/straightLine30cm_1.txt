@@ -1,0 +1,78 @@
+Serial ready!
+LCD initialized.
+Morse initialized.
+IMU initialized with the following configuration: 
+
+ * Sleep Mode:        Disabled
+ * Clock Source:      Internal 8MHz oscillator
+ * Gyroscope:         500 dps
+ * Accelerometer range: +- 4g
+ * Gyroscope offsets: 0 / 0 / 0
+
+Front ultrasonic sensor initialized.
+Motors initialized.
+
+
+Setup complete!
+
+<IMU_DATA>
+Time=0.04,Ax=0.01,Ay=-0.01,Az=1.00,Gx=-3.25,Gy=-0.94,Gz=0.56,Pitch=-0.55,Roll=0.80,Velocity=0.00,Distance=0.00
+Time=0.06,Ax=0.10,Ay=0.22,Az=0.90,Gx=0.26,Gy=0.12,Gz=-1.18,Pitch=13.68,Roll=6.29,Velocity=0.00,Distance=0.00
+Time=0.20,Ax=-0.00,Ay=-0.01,Az=0.97,Gx=-2.07,Gy=-0.57,Gz=-1.59,Pitch=-0.86,Roll=-0.27,Velocity=0.00,Distance=0.00
+Time=0.22,Ax=-0.01,Ay=-0.01,Az=1.03,Gx=-5.91,Gy=0.14,Gz=-0.32,Pitch=-0.40,Roll=-0.54,Velocity=0.00,Distance=0.00
+Time=0.26,Ax=-0.01,Ay=0.04,Az=0.94,Gx=-1.90,Gy=-0.15,Gz=-1.41,Pitch=2.66,Roll=-0.75,Velocity=0.00,Distance=0.00
+Time=0.28,Ax=0.04,Ay=-0.02,Az=0.93,Gx=-0.85,Gy=0.63,Gz=-3.26,Pitch=-1.42,Roll=2.36,Velocity=0.00,Distance=0.00
+Time=0.30,Ax=-0.00,Ay=-0.01,Az=0.91,Gx=-0.30,Gy=-1.03,Gz=-1.53,Pitch=-0.81,Roll=-0.27,Velocity=0.00,Distance=0.00
+Time=0.34,Ax=0.03,Ay=-0.00,Az=1.00,Gx=-1.78,Gy=0.21,Gz=-1.48,Pitch=-0.18,Roll=1.86,Velocity=0.00,Distance=0.00
+Time=0.36,Ax=0.07,Ay=-0.01,Az=0.79,Gx=-11.34,Gy=1.80,Gz=8.72,Pitch=-0.44,Roll=4.84,Velocity=0.00,Distance=0.00
+Time=0.38,Ax=0.06,Ay=-0.01,Az=1.13,Gx=-2.30,Gy=0.05,Gz=-0.82,Pitch=-0.28,Roll=3.17,Velocity=0.00,Distance=0.00
+Time=0.40,Ax=0.10,Ay=0.04,Az=1.05,Gx=-1.86,Gy=-1.25,Gz=-0.77,Pitch=2.16,Roll=5.38,Velocity=0.00,Distance=0.00
+Time=0.42,Ax=0.07,Ay=-0.01,Az=0.93,Gx=-7.69,Gy=0.50,Gz=-0.15,Pitch=-0.91,Roll=4.14,Velocity=0.00,Distance=0.00
+Time=0.48,Ax=0.04,Ay=0.14,Az=0.85,Gx=-5.97,Gy=0.27,Gz=0.35,Pitch=9.08,Roll=2.78,Velocity=0.00,Distance=0.00
+Time=0.58,Ax=0.07,Ay=-0.01,Az=1.05,Gx=-0.20,Gy=0.24,Gz=-3.07,Pitch=-0.63,Roll=3.75,Velocity=0.00,Distance=0.00
+Time=0.60,Ax=0.07,Ay=-0.01,Az=1.08,Gx=-1.59,Gy=0.41,Gz=-0.65,Pitch=-0.35,Roll=3.92,Velocity=0.00,Distance=0.00
+Time=0.64,Ax=0.00,Ay=-0.01,Az=0.81,Gx=-0.60,Gy=-0.11,Gz=-1.31,Pitch=-0.48,Roll=0.20,Velocity=0.00,Distance=0.00
+Time=0.68,Ax=0.08,Ay=-0.01,Az=1.03,Gx=-7.51,Gy=-1.16,Gz=-1.86,Pitch=-0.40,Roll=4.24,Velocity=0.00,Distance=0.00
+Time=0.72,Ax=-0.01,Ay=0.10,Az=1.05,Gx=-6.73,Gy=1.39,Gz=1.12,Pitch=5.56,Roll=-0.33,Velocity=0.00,Distance=0.00
+Time=0.74,Ax=0.03,Ay=-0.00,Az=1.00,Gx=-1.28,Gy=0.12,Gz=1.72,Pitch=-0.15,Roll=1.80,Velocity=0.00,Distance=0.00
+Time=0.76,Ax=0.07,Ay=-0.02,Az=1.03,Gx=1.10,Gy=-1.47,Gz=-1.25,Pitch=-0.86,Roll=4.11,Velocity=0.00,Distance=0.00
+Time=0.78,Ax=0.07,Ay=-0.00,Az=0.97,Gx=-0.33,Gy=-0.47,Gz=-0.29,Pitch=-0.03,Roll=4.04,Velocity=0.00,Distance=0.00
+Time=0.82,Ax=0.07,Ay=-0.02,Az=1.03,Gx=-1.96,Gy=-3.63,Gz=0.59,Pitch=-1.20,Roll=3.87,Velocity=0.00,Distance=0.00
+Time=0.84,Ax=0.04,Ay=-0.01,Az=0.94,Gx=-1.92,Gy=0.14,Gz=-0.14,Pitch=-0.50,Roll=2.67,Velocity=0.00,Distance=0.00
+Time=0.92,Ax=-0.00,Ay=0.01,Az=1.06,Gx=-3.58,Gy=-1.75,Gz=-2.68,Pitch=0.50,Roll=-0.26,Velocity=0.00,Distance=0.00
+Time=0.94,Ax=0.01,Ay=0.01,Az=1.05,Gx=-1.77,Gy=-0.32,Gz=-3.11,Pitch=0.68,Roll=0.41,Velocity=0.00,Distance=0.00
+Time=0.96,Ax=0.04,Ay=-0.02,Az=1.03,Gx=-0.74,Gy=0.00,Gz=-1.78,Pitch=-1.30,Roll=2.25,Velocity=0.00,Distance=0.00
+Time=1.00,Ax=-0.01,Ay=-0.00,Az=0.90,Gx=-7.74,Gy=-1.00,Gz=-0.44,Pitch=-0.26,Roll=-0.71,Velocity=0.00,Distance=0.00
+Time=1.02,Ax=-0.01,Ay=0.17,Az=0.94,Gx=-7.22,Gy=-0.41,Gz=0.14,Pitch=10.25,Roll=-0.68,Velocity=0.00,Distance=0.00
+Time=1.06,Ax=-0.01,Ay=0.06,Az=0.87,Gx=-1.42,Gy=1.32,Gz=0.94,Pitch=4.22,Roll=-0.82,Velocity=0.00,Distance=0.00
+Time=1.08,Ax=0.07,Ay=-0.01,Az=0.96,Gx=0.86,Gy=-0.83,Gz=1.57,Pitch=-0.88,Roll=4.03,Velocity=0.00,Distance=0.00
+Time=1.14,Ax=0.07,Ay=0.01,Az=0.97,Gx=-6.62,Gy=0.76,Gz=-0.79,Pitch=0.30,Roll=4.33,Velocity=0.00,Distance=0.00
+Time=1.18,Ax=-0.01,Ay=0.04,Az=1.00,Gx=-3.37,Gy=-1.68,Gz=1.87,Pitch=2.11,Roll=-0.81,Velocity=0.00,Distance=0.00
+Time=1.24,Ax=0.04,Ay=0.01,Az=1.05,Gx=-3.02,Gy=-3.79,Gz=1.33,Pitch=0.61,Roll=1.92,Velocity=0.00,Distance=0.00
+Time=1.26,Ax=0.04,Ay=-0.03,Az=1.06,Gx=-7.15,Gy=-0.68,Gz=1.28,Pitch=-1.64,Roll=2.25,Velocity=0.00,Distance=0.00
+Time=1.28,Ax=-0.01,Ay=0.03,Az=1.02,Gx=-0.60,Gy=-1.28,Gz=1.24,Pitch=1.93,Roll=-0.54,Velocity=0.00,Distance=0.00
+Time=1.30,Ax=0.06,Ay=-0.02,Az=0.96,Gx=4.02,Gy=1.71,Gz=-1.53,Pitch=-0.94,Roll=3.74,Velocity=0.00,Distance=0.00
+Time=1.34,Ax=-0.01,Ay=0.04,Az=1.00,Gx=1.42,Gy=-0.23,Gz=-3.61,Pitch=2.37,Roll=-0.71,Velocity=0.00,Distance=0.00
+Time=1.36,Ax=0.07,Ay=-0.01,Az=0.90,Gx=-10.69,Gy=-1.38,Gz=-2.68,Pitch=-0.68,Roll=4.62,Velocity=0.00,Distance=0.00
+Time=1.40,Ax=0.03,Ay=-0.01,Az=0.84,Gx=-6.35,Gy=0.79,Gz=1.84,Pitch=-0.63,Roll=2.11,Velocity=0.00,Distance=0.00
+Time=1.46,Ax=0.08,Ay=-0.01,Az=1.00,Gx=-0.53,Gy=0.44,Gz=0.45,Pitch=-0.51,Roll=4.38,Velocity=0.00,Distance=0.00
+Time=1.50,Ax=-0.01,Ay=-0.01,Az=0.96,Gx=-2.18,Gy=1.12,Gz=-0.76,Pitch=-0.47,Roll=-0.81,Velocity=0.00,Distance=0.00
+Time=1.52,Ax=-0.01,Ay=0.04,Az=0.99,Gx=-0.38,Gy=1.00,Gz=-1.13,Pitch=2.47,Roll=-0.75,Velocity=0.00,Distance=0.00
+Time=1.54,Ax=0.04,Ay=-0.02,Az=1.05,Gx=-2.74,Gy=0.80,Gz=0.00,Pitch=-1.04,Roll=2.24,Velocity=0.00,Distance=0.00
+Time=1.56,Ax=-0.01,Ay=-0.00,Az=1.02,Gx=-2.40,Gy=-0.62,Gz=0.05,Pitch=-0.22,Roll=-0.51,Velocity=0.00,Distance=0.00
+Time=1.58,Ax=0.04,Ay=-0.01,Az=0.96,Gx=-1.62,Gy=-0.26,Gz=-0.94,Pitch=-0.68,Roll=2.23,Velocity=0.00,Distance=0.00
+Time=1.60,Ax=0.10,Ay=0.01,Az=0.84,Gx=-2.49,Gy=0.30,Gz=-3.36,Pitch=0.46,Roll=6.58,Velocity=0.00,Distance=0.00
+Time=1.66,Ax=0.03,Ay=-0.06,Az=0.97,Gx=-7.69,Gy=-1.39,Gz=1.07,Pitch=-3.45,Roll=1.97,Velocity=0.00,Distance=0.00
+Time=1.76,Ax=0.07,Ay=0.01,Az=0.87,Gx=-1.45,Gy=-0.12,Gz=1.03,Pitch=0.68,Roll=4.36,Velocity=0.00,Distance=0.00
+Time=1.80,Ax=-0.01,Ay=-0.01,Az=0.91,Gx=-0.68,Gy=-0.51,Gz=-3.13,Pitch=-0.55,Roll=-0.81,Velocity=0.00,Distance=0.00
+Time=1.82,Ax=-0.01,Ay=0.07,Az=0.93,Gx=-0.57,Gy=-1.38,Gz=-1.30,Pitch=4.29,Roll=-0.53,Velocity=0.00,Distance=0.00
+Time=1.88,Ax=-0.00,Ay=0.00,Az=0.93,Gx=-3.46,Gy=-0.94,Gz=-1.09,Pitch=0.22,Roll=-0.24,Velocity=0.00,Distance=0.00
+Time=1.90,Ax=-0.01,Ay=0.01,Az=0.96,Gx=-1.44,Gy=0.71,Gz=-2.13,Pitch=0.60,Roll=-0.55,Velocity=0.00,Distance=0.00
+Time=1.98,Ax=0.04,Ay=-0.00,Az=0.97,Gx=-0.26,Gy=1.16,Gz=0.59,Pitch=-0.21,Roll=2.46,Velocity=0.00,Distance=0.00
+Time=2.04,Ax=-0.01,Ay=-0.05,Az=1.00,Gx=-1.01,Gy=0.95,Gz=-0.66,Pitch=-2.88,Roll=-0.69,Velocity=0.00,Distance=0.00
+Time=2.06,Ax=0.03,Ay=-0.05,Az=0.97,Gx=1.01,Gy=-1.31,Gz=-2.36,Pitch=-3.17,Roll=2.01,Velocity=0.00,Distance=0.00
+Time=2.10,Ax=-0.01,Ay=-0.05,Az=1.06,Gx=-0.09,Gy=-1.12,Gz=-1.04,Pitch=-2.94,Roll=-0.44,Velocity=0.00,Distance=0.00
+Time=2.12,Ax=0.04,Ay=-0.00,Az=0.97,Gx=0.00,Gy=0.15,Gz=-1.86,Pitch=-0.16,Roll=2.59,Velocity=0.00,Distance=0.00
+Time=2.14,Ax=-0.01,Ay=0.04,Az=0.99,Gx=1.42,Gy=0.35,Gz=-0.20,Pitch=2.42,Roll=-0.84,Velocity=0.00,Distance=0.00
+Time=2.22,Ax=-0.01,Ay=-0.00,Az=0.87,Gx=-0.53,Gy=0.14,Gz=7.81,Pitch=-0.29,Roll=-0.59,Velocity=0.00,Distance=0.00
+Time=2.24,Ax=-0.01,Ay=0.16,Az=1.03,Gx=-0.14,Gy=-1.56,Gz=4.84,Pitch=8.62,Roll=-0.56,Velocity=0.00,Distance=0.00
