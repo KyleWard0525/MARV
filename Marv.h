@@ -17,11 +17,8 @@
 #include "GPIO.h"
 #include "RSLK_Pins.h"
 #include "Utils.h"
-#include "Bumpers.h"
-#include "I2C.h"
-#include "IMU.h"
+#include "SensorController.h"
 #include "Morse.h"
-#include "Ultrasonic.h"
 #include "LCD.h"
 #include "Motors.h"
 
@@ -31,9 +28,7 @@ using namespace std;
 class Marv {
 
   private:
-    uint8_t forwardBufferDist;            //  Forward buffer distance in cm
     const float wheelBase = 14;           //  Wheel base in cm
-    Bumpers bumpSensors;                  //  Interface for the bump sensors
 
 
     //  Struct for controlling MARV's "emotions" and corresponding behavior
@@ -82,12 +77,10 @@ class Marv {
     pins_t periphs;                       //  Peripheral pins
     I2C serialBus;                        //  Reading and writing data of I2C channels
     Motors* motors;                       //  API for precise motor controls
-    IMU* imu;                             //  Measuring acceleration and gyro forces
     Morse* morse;                         //  Communcation with the outside world through Morse code
-    UltrasonicSensor* frontSonicSensor;   //  Forward facing sensor for measuring distance using ultrasound
-    UltrasonicSensor* rearSonicSensor;    //  Rear facing sensor for measuring distance using ultrasound
     LCD* lcd;                             //  Interface for LCD1602 screen
-    Servo servo;                          //  Servo API
+    SensorController* sensors;            //  Controller for interfacing with sensor
+    Servo servo;
     
     //  Main constructor
     Marv(pins_t peripherals, LiquidCrystal_I2C* lcdI2C)
@@ -95,6 +88,9 @@ class Marv {
       // Set peripheral pins
       periphs = peripherals;
       servo.attach(periphs.servoPin);
+      
+      // Initialize sensors
+      sensors = new SensorController(periphs);
 
       // Initialize LCD screen
       lcd = new LCD(lcdI2C);
@@ -103,15 +99,7 @@ class Marv {
       // Initialize morse object
       morse = new Morse(periphs.buzzer, periphs.morseLed);
       Serial.println("Morse initialized.");
-      
-      // Initialize IMU
-      imu = new IMU(&serialBus);
-      
-      // Initialize ultrasonic sensors
-      frontSonicSensor = new UltrasonicSensor(periphs.frontEchoPin, periphs.frontTrigPin);
-      frontSonicSensor->offsetDist = 2;
-      frontSonicSensor->bufferDist = 5;
-      Serial.println("Front ultrasonic sensor initialized.");
+
 
 //      rearSonicSensor = new UltrasonicSensor(periphs.rearEchoPin, periphs.rearTrigPin);
 //      rearSonicSensor->offsetDist = 0;
@@ -119,12 +107,11 @@ class Marv {
 //      Serial.println("Rear ultrasonic sensor initialized.");
 
       // Initialize motors
-      motors = new Motors(imu, frontSonicSensor, lcd, periphs);
+      motors = new Motors(sensors->imu, sensors->frontSonicSensor, lcd, periphs);
       Serial.println("Motors initialized.");
 
       // Set MARV's initial internal states and variables
       emotions.feeling = emotions.Idle;
-      forwardBufferDist = frontSonicSensor->offsetDist + frontSonicSensor->bufferDist; // buffer in front of robot
 
       // Signal that MARV is ready to go
       signalReady();
@@ -154,7 +141,7 @@ class Marv {
       // Move servo and store measurements in return array (outputs)
       servo.write(i);
       delay(delayMs/2);
-      outputs[arrIdx] = frontSonicSensor->measure();
+      outputs[arrIdx] = sensors->frontSonicSensor->measure();
       delay(delayMs/2);
       arrIdx++;
     }
