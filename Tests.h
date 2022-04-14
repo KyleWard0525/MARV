@@ -14,7 +14,7 @@ void testIMU(Marv* robot)
 {
   double arr[3];
   
-  robot->imu->getAccels(arr);
+  robot->sensors->imu->getAccels(arr);
   Serial.print("\nAx = " + String(arr[0]) + "g");
   Serial.print("\tAy = " + String(arr[1]) + "g");
   Serial.print("\tAz = " + String(arr[2]) + "g\n");
@@ -29,7 +29,7 @@ void straightLineTest(Marv* robot, double dist, uint32_t sampleRateHz)
   session.sampleRateMs = hertzToMilliseconds(sampleRateHz);  //  Convert Hz to milliseconds
 
   // Set IMU session
-  robot->imu->session = &session;
+  robot->sensors->imu->session = &session;
 
   // Move
   robot->motors->forward(dist);
@@ -55,7 +55,7 @@ void testIMU_Session(Marv* robot)
   session.sampleRateMs = 25;  //  ms betweeen samples
 
   // Set IMU session
-  robot->imu->session = &session;
+  robot->sensors->imu->session = &session;
   
   unsigned long start = millis();
   
@@ -92,11 +92,11 @@ void testIMU_SessionResize(Marv* robot)
   Serial.println("\nin Tests.testIMUSessionResize(): Session start size: " + String(startLen));
 
   // Set robot's current IMU session
-  robot->imu->session = &session; 
+  robot->sensors->imu->session = &session; 
   
   for(int i = 0; i < startLen*4; i++)
   {
-    robot->imu->poll();
+    robot->sensors->imu->poll();
     delay(50);
     Serial.println("Session size: " + String(session.szData));
   } 
@@ -107,13 +107,13 @@ void testStruct_IMUVals(Marv* robot)
 {
   // Create an IMU session
   IMU_Session session(1);
-  robot->imu->session = &session;
+  robot->sensors->imu->session = &session;
 
   // Poll imu
-  robot->imu->poll();
+  robot->sensors->imu->poll();
 
   // Get data from session
-  imu_vals_t measurement = robot->imu->session->at(0);
+  imu_vals_t measurement = robot->sensors->imu->session->at(0);
   
   double rawAccels[3];
   measurement.getRawAccels(rawAccels);
@@ -129,10 +129,11 @@ void testStruct_IMUVals(Marv* robot)
 void testServoSweep(Marv* robot)
 {
   uint32_t minPos = 45;
-  uint32_t maxPos = 135;
-  uint32_t nPolls = (maxPos - minPos) + 1;
+  uint32_t maxPos = 170;
+  uint32_t stepSize = 1;
+  uint32_t nPolls = (maxPos - minPos) / stepSize;
   long outputs[nPolls];
-  robot->servoSweep(45, 135, 1, outputs);
+  robot->servoSweep(minPos, maxPos, stepSize, outputs);
   Serial.print("\nMeasurements: ");
   printArray(outputs, nPolls);
 
@@ -141,12 +142,15 @@ void testServoSweep(Marv* robot)
   long minDist = outputs[minIdx];
 
   Serial.println("Minimum index: " + String(minIdx));
-  Serial.println("Servo pos. of minimum index: " + String(maxPos - minIdx));
   Serial.println("Minimum distance: " + String(minDist) + "cm");
 
   delay(1000);
+  int servoPos = map(minIdx, 0, nPolls, minPos, maxPos);
+  Serial.println("Servo pos. of minimum index: " + String(servoPos));
+  robot->servo.write(servoPos);
 
-  robot->servo.write(maxPos - minIdx);
+  int turnAngle = servoPosToTurnAngle(servoPos);
+  Serial.println("Marv angle to move to align with servo: " + String(turnAngle));
 }
 
 
