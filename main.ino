@@ -19,8 +19,6 @@ Marv* robot;                  //  Main robot driver
 Servo servo;                  //  Servo motor object
 pins_t periphs;               //  Peripheral pins     
 
-
-
 void setup() {  
   // Setup serial output
   Serial.begin(115200);
@@ -47,9 +45,6 @@ void setup() {
   periphs.startPin = 63;          //  P6_3
   periphs.pirPin = 46;            //  P6_2
   periphs.servoPin = 67;          //  P9_7
-
-
-  Serial.println("100Hz = " + String(hertzToMilliseconds(100)) + "ms");
 
   // Setup servo pin (Must be initialized here, before other setup)
   servo.attach(periphs.servoPin);
@@ -83,19 +78,19 @@ void setup() {
   // Setup PIR Sensor pins
   pinMode(periphs.pirPin, INPUT);
 
+
   robot = new Marv(periphs, &lcdI2C_module);
   Serial.println("\n\nSetup complete!\n");
 }
 
-void loop() {
+void loop(){
  
   if(digitalRead(periphs.startPin)==1 || digitalRead(PUSH2)==0)
   {
-    Serial.println("Start button pressed!");
-    delay(250);
-    testIMU_SessionResize(robot);
-  }
+    delay(500);
 
+    straightLineTest(robot, 12, 90);
+  }
   
   delay(100); 
 }
