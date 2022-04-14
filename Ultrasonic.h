@@ -68,20 +68,6 @@ class UltrasonicSensor {
     return distances[2];
   }
 
-  // Perform an environmental sweep (assuming the sonic sensor is mounted on top of the servo
-  void servoSweep(Servo* servo, uint16_t startPos, uint16_t endPos, uint16_t stepSize, long* outputs)
-  {
-    // Loop through specified sweep range
-    for(uint16_t i = startPos; i <= endPos; i++)
-    {
-      // Move servo and store measurements in return array (outputs)
-      servo->write(i);
-      delay(50);
-      outputs[i] = measure();
-      delay(50);
-    }
-    
-  }
 };
 
 
