@@ -90,7 +90,6 @@ class Motors {
 
       //Serial.println("Pulses needed to travel " + String(dist_cm) + " cm = " + String(nPulses));
 
-      
 
      // Wait for motor encoder to read nPulses (distance traveled = dist_cm)
      while(getEncoderLeftCnt() < nPulses && getEncoderRightCnt() < nPulses)
