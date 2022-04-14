@@ -21,6 +21,7 @@ void testIMU(Marv* robot)
   delay(1000);
 }
 
+// Test telemetry capture in a straight line
 void straightLineTest(Marv* robot, double dist, uint32_t sampleRateHz)
 {
   // Create an IMU session and set IMU sample rate
@@ -124,9 +125,29 @@ void testStruct_IMUVals(Marv* robot)
 }
 
 
+// Test servo sweep util function
+void testServoSweep(Marv* robot)
+{
+  uint32_t minPos = 45;
+  uint32_t maxPos = 135;
+  uint32_t nPolls = (maxPos - minPos) + 1;
+  long outputs[nPolls];
+  robot->servoSweep(45, 135, 1, outputs);
+  Serial.print("\nMeasurements: ");
+  printArray(outputs, nPolls);
 
+  // Get index of minimum valiue in outputs
+  int minIdx = minIndex(outputs, nPolls);
+  long minDist = outputs[minIdx];
 
+  Serial.println("Minimum index: " + String(minIdx));
+  Serial.println("Servo pos. of minimum index: " + String(maxPos - minIdx));
+  Serial.println("Minimum distance: " + String(minDist) + "cm");
 
+  delay(1000);
+
+  robot->servo.write(maxPos - minIdx);
+}
 
 
 
