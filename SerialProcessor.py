@@ -7,6 +7,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
+from scipy.fft import fft, fftfreq
 
 txt_path = "data/imu/outputs/"
 plot_path = "data/imu/plots/"
@@ -31,10 +32,15 @@ def read_data(filename):
     
     # Extract lines of imu data
     imu_lines = ' '.join(lines.split(data_tags[0])[1].split("\n")).split()
-    data['sample_rate'] = int(imu_lines[0].split('=')[1])
+    
+    # Extract session info
+    data['distance'] = int(imu_lines[0].split('=')[1])
+    data['sample_rate'] = int(imu_lines[1].split('=')[1])
+    
+    print(f"Distance: {data['distance']}\tSample Rate: {data['sample_rate']}")
     
     # Iterate through lines and extract data
-    for line in imu_lines[1:]:
+    for line in imu_lines[2:]:
         # Split into seperate measurements
         metrics = line.split(',')
         
@@ -49,7 +55,6 @@ def read_data(filename):
                 data['raw'][header].append(float(value))
             else:
                 data['raw'][header].append(float(value))
-
 
     # Copy raw data to lowpass and highpass arrays
     data['lowpass'] = dict.copy(data['raw'])
@@ -75,7 +80,7 @@ def butter_filter(data, sampling_rate, type, cutoff=0.5, ord=5):
         
 
 # Plot acceleration and gyro data 
-def plot_data(data, save=True, filename='accelerationPlots.png'):
+def plot_data(data, save=True, filename='accelerationPlots.png', sample_rate=90):
     x_axis = data['Time']
     
     fig, axs = plt.subplots(3, 2, sharex=True, figsize=(15, 10))
@@ -116,11 +121,51 @@ def plot_data(data, save=True, filename='accelerationPlots.png'):
     
     if save:
         fig.savefig(plot_path + filename)
+        
+        
+    # Apply an fft to the data and plot again
+    data_copy = dict.copy(data)
+    samples = len(data['Time'])
     
+    # Apply fft to acceleration data
+    data_copy['Ax'] = fft(data_copy['Ax'])
+    data_copy['Ay'] = fft(data_copy['Ay'])
+    data_copy['Az'] = fft(data_copy['Az'])
+    data_copy['Gz'] = fft(data_copy['Gz'])
+    
+    # Compute frequency
+    fft_freq = fftfreq(samples, 1.0/sample_rate)
+    
+    # Update filename
+    filename = filename.split('.')[0] + '_fft.png'
+    
+    fft_fig, axs = plt.subplots(2, 2, sharex=True, figsize=(15, 10))
+    
+    axs[0,0].plot(fft_freq, abs(data_copy['Ax']))
+    axs[0,0].set_title('FFT of Lateral Acceleration')
+    
+    axs[0,1].plot(fft_freq, abs(data_copy['Ay']))
+    axs[0,1].set_title('FFT of Longitudinal Acceleration')
+    axs[0,1].set_xlabel('Frequency (Hz?)')
+    axs[0,1].set_ylabel('Amplitude')
+    
+    axs[1,0].plot(fft_freq, abs(data_copy['Az']))
+    axs[1,0].set_title('FFT of Vertical Acceleration')
+    
+    axs[1,1].plot(fft_freq, abs(data_copy['Gz']), 'r')
+    axs[1,1].set_title('FFT of Gz')
+    
+    fft_fig.suptitle('MARV IMU FFT Plots: ' + str(filename.split('.')[0]))
+    plt.show()
+    
+    if save:
+        fft_fig.savefig(plot_path + filename)
 
 data = read_data(filename)
 
+
+
 for header in data:
-    if not header == 'sample_rate':
-        plot_data(data[header], True, f"straightLine12cm{data['sample_rate']}HzTest_{header}.png")
+    if not header == 'sample_rate' :
+        plot_data(data[header], True, f"straightLine{data['distance']}cm{data['sample_rate']}HzTest_{header}.png", sample_rate=data['sample_rate'])
 #plot_data(data, True, str(sys.argv[1]) + '.png')
