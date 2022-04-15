@@ -62,7 +62,7 @@ def read_data(filename):
 
     # Loop through file data and apply a high-pass filter
     for header in data['raw']:
-        if not header in ['Time', 'Velocity', 'Distance']:    
+        if not header in ['Time']:    
             data['lowpass'][header] = butter_filter(data['lowpass'][header], sampling_rate=data['sample_rate'], cutoff=0.5, type='low')            
             data['highpass'][header] = butter_filter(data['highpass'][header], sampling_rate=data['sample_rate'], type='high')
             
@@ -111,10 +111,10 @@ def plot_data(data, save=True, filename='accelerationPlots.png', sample_rate=90)
     axs[1,1].set_title('Pitch')
     axs[1,1].set_ylabel('Angle (deg)')
     
-    # Plot roll
-    axs[2,1].plot(x_axis, data['Roll'], 'g')
-    axs[2,1].set_title('Roll')
-    axs[2,1].set_ylabel('Angle (deg)')
+    # Plot Velocity
+    axs[2,1].plot(x_axis, data['Velocity'], 'g')
+    axs[2,1].set_title('Velocity')
+    axs[2,1].set_ylabel('cm/s')
 
     fig.suptitle('MARV IMU Plots: ' + str(filename.split('.')[0]))
     plt.show()
@@ -156,7 +156,6 @@ def plot_data(data, save=True, filename='accelerationPlots.png', sample_rate=90)
     axs[1,1].set_title('FFT of Gz')
     
     fft_fig.suptitle('MARV IMU FFT Plots: ' + str(filename.split('.')[0]))
-    plt.show()
     
     if save:
         fft_fig.savefig(plot_path + filename)
