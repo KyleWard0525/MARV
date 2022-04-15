@@ -100,14 +100,8 @@ class Marv {
       morse = new Morse(periphs.buzzer, periphs.morseLed);
       Serial.println("Morse initialized.");
 
-
-//      rearSonicSensor = new UltrasonicSensor(periphs.rearEchoPin, periphs.rearTrigPin);
-//      rearSonicSensor->offsetDist = 0;
-//      rearSonicSensor->bufferDist = 5;
-//      Serial.println("Rear ultrasonic sensor initialized.");
-
       // Initialize motors
-      motors = new Motors(sensors->imu, sensors->frontSonicSensor, lcd, periphs);
+      motors = new Motors(sensors);
       Serial.println("Motors initialized.");
 
       // Set MARV's initial internal states and variables
@@ -129,26 +123,7 @@ class Marv {
     }
 
     
-  // Perform an environmental sweep (assuming the sonic sensor is mounted on top of the servo
-  void servoSweep(uint16_t startPos, uint16_t endPos, uint16_t stepSize, long* outputs, uint32_t delayMs=100)
-  {
-    // Array index (since the loop is using values that may not be from 0-length of array)
-    uint16_t arrIdx = 0;
-    
-    // Loop through specified sweep range
-    for(uint16_t i = startPos; i <= endPos; i++)
-    {
-      // Move servo and store measurements in return array (outputs)
-      servo.write(i);
-      delay(delayMs/2);
-      outputs[arrIdx] = sensors->frontSonicSensor->measure();
-      delay(delayMs/2);
-      arrIdx++;
-    }
-
-    // Return servo to face forward
-    servo.write(90);
-  }
+  
 
 };
 
