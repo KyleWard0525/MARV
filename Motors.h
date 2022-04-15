@@ -85,8 +85,9 @@ class Motors {
       rightMotor.enableMotor();
 
       // Set motor speed (start moving)
-      leftMotor.setRawSpeed(driveSpeed);
-      rightMotor.setRawSpeed(driveSpeed);
+      int motorSpeed = 5;
+      leftMotor.setRawSpeed(motorSpeed);
+      rightMotor.setRawSpeed(motorSpeed);
 
       //Serial.println("Pulses needed to travel " + String(dist_cm) + " cm = " + String(nPulses));
 
@@ -100,11 +101,32 @@ class Motors {
          // Poll imu and save data in current imu session
          imu->poll(); 
         }
+
+        // Gradually increase speed
+        if((motorSpeed < driveSpeed) && (getEncoderLeftCnt() % driveSpeed == 0))
+        {
+          motorSpeed++;
+          leftMotor.setRawSpeed(motorSpeed);
+          rightMotor.setRawSpeed(motorSpeed);
+        }
+
+
+        // Check if motors are turning at different speeds 
+        if(getEncoderLeftCnt() > getEncoderRightCnt())
+        {
+          leftMotor.setRawSpeed(motorSpeed - 2);
+          rightMotor.setRawSpeed(motorSpeed);
+        }
+        else if(getEncoderRightCnt() > getEncoderLeftCnt())
+        {
+          rightMotor.setRawSpeed(motorSpeed - 2);
+          leftMotor.setRawSpeed(motorSpeed);
+        }
         
         // Check forward sensors
         //monitorForwardSensors();
 
-         delay(1);
+         delay(5);
      }
      
       // Stop motors
