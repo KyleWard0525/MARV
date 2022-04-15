@@ -36,6 +36,7 @@ void straightLineTest(Marv* robot, double dist, uint32_t sampleRateHz)
 
   // Write measurements over serial
   Serial.println("<IMU_DATA>");
+  Serial.println("distance=" + String(round(dist)));
   Serial.println("sample_rate=" + String(sampleRateHz));
   for(int i = 0; i < session.samples; i++)
   {
@@ -151,6 +152,9 @@ void testServoSweep(Marv* robot)
 
   int turnAngle = servoPosToTurnAngle(servoPos);
   Serial.println("Marv angle to move to align with servo: " + String(turnAngle));
+
+  delay(1000);
+  robot->motors->turn(turnAngle);
 }
 
 
