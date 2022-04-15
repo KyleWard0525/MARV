@@ -35,14 +35,7 @@ void straightLineTest(Marv* robot, double dist, uint32_t sampleRateHz)
   robot->motors->forward(dist);
 
   // Write measurements over serial
-  Serial.println("<IMU_DATA>");
-  Serial.println("distance=" + String(round(dist)));
-  Serial.println("sample_rate=" + String(sampleRateHz));
-  for(int i = 0; i < session.samples; i++)
-  {
-      session.data[i].to_string();
-  }
-  Serial.println("<END>");
+  session.writeToSerial();
 }
 
 // Test storing data in an IMU session
@@ -134,7 +127,7 @@ void testServoSweep(Marv* robot)
   uint32_t stepSize = 1;
   uint32_t nPolls = (maxPos - minPos) / stepSize;
   long outputs[nPolls];
-  robot->servoSweep(minPos, maxPos, stepSize, outputs);
+  robot->sensors->servoSweep(minPos, maxPos, stepSize, outputs);
   Serial.print("\nMeasurements: ");
   printArray(outputs, nPolls);
 
