@@ -89,7 +89,7 @@ void loop(){
   {
     delay(500);
 
-    straightLineTest(robot, 12, 90);
+    straightLineTest(robot, 15, 90);
   }
   
   delay(100); 
