@@ -86,8 +86,6 @@ class IMU_Session {
       data = new imu_vals_t[szData];
     }
 
-    
-
     // Add IMU data to the end of the data list
     void push(imu_vals_t imu_data)
     {
@@ -147,6 +145,19 @@ class IMU_Session {
       // Return imu_vals
       return data[idx];
     }
+
+    // Write session data over Serial
+    void writeToSerial()
+    {
+      Serial.println("<IMU_DATA>");
+      Serial.println("distance=" + String(round(distance)));
+      Serial.println("sample_rate=" + String(round(floor((millisecondsToHertz(sampleRateMs))))));
+      for(int i = 0; i < samples; i++)
+      {
+          data[i].to_string();
+      }
+      Serial.println("<END>");
+    }
     
     // Get start time
     unsigned long getStartTime()
@@ -154,11 +165,11 @@ class IMU_Session {
       return startTime; 
     }
 
-   // Get time of last measurement
-   unsigned long getPrevTimepoint()
-   {
-    return prevTimepoint;
-   }
+     // Get time of last measurement
+     unsigned long getPrevTimepoint()
+     {
+      return prevTimepoint;
+     }
   
 };
 
