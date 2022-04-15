@@ -298,12 +298,12 @@ class IMU {
       data.timepoint = millis() - session->getStartTime();
 
       // Compute change in time since last measurement
-      unsigned long dt = (data.timepoint - session->getPrevTimepoint()) / 1000.0;
-         
+      double dt = (data.timepoint - session->getPrevTimepoint()) / 1000.0;
+      
       // Update session derivatives
       //heading += (gyroArr[2]/500) * dt;
-      session->velocity += (accelArr[1] * dt) * 32.17; // Convert to feet per second
-      session->distance += session->velocity * dt; // In feet
+      session->velocity += accelArr[1] * dt * 100.0; // cm/s
+      session->distance += session->velocity * dt; // cm
 
       // Read gyro values from mpu registers
       double gyroArr[3];
@@ -330,6 +330,9 @@ class IMU {
         // Increment total samples taken
         session->samples++;
       }
+
+      // Update previous time step
+      //prevTimeStep = dt;
     }
 
 
