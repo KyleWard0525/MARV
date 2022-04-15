@@ -11,8 +11,7 @@
 #include "RSLK_Pins.h"
 #include "Encoder.h"
 #include "Romi_Motor_Power.h"
-#include "Bumpers.h"
-#include "Ultrasonic.h"
+#include "SensorController.h"
 
 class Motors {
 
@@ -23,23 +22,19 @@ class Motors {
     const float wheelBase = 14;                     //  Wheel base in cm
     const float gearRatio = 120;                    //  120:1 because ratio = (360 / pulses per motor revolution(3)) 
     double cmPerPulse;                              //  Centimeters traveled per pulse
-    pins_t periphs;                                 //  Struct of peripheral pins
-
+    SensorController* sensors;                      //  API for the sensors
   public:
     Romi_Motor_Power leftMotor;                       //  For controlling left wheel
     Romi_Motor_Power rightMotor;                      //  For controlling right wheel
-    Bumpers bumpSensors;                              //  Bump sensor interface
-    LCD* lcd;                                         //  Interface for LCD1602 screen
-    IMU* imu;                                         //  Onboard IMU
-    UltrasonicSensor* sonicSensor;                    //  Ultrasonic sensor interface
-    double heading;                                   //  Current heading angle
     uint16_t buzzerPin = 2;                           //  GPIO pin for the buzzer
     int driveSpeed = 40;                              //  Default driving speed
     int turnSpeed = 75;                               //  Default turning speed
 
     //  Main constructor
-    Motors(IMU* mpu, UltrasonicSensor* sonic, LCD* screen, pins_t pins) 
+    Motors(SensorController* _sensors) 
     {
+        sensors = _sensors;
+        
         // Compute cm traveled per pulse
         cmPerPulse = (wheelDiameter * M_PI) / (gearRatio * pulsesPerMotorRev);
       
@@ -51,25 +46,11 @@ class Motors {
         // Initialize motors
         leftMotor.begin(MOTOR_L_SLP_PIN,MOTOR_L_DIR_PIN,MOTOR_L_PWM_PIN);  // Params: sleep(enable) pin, direction pin, pwm pin
         rightMotor.begin(MOTOR_R_SLP_PIN,MOTOR_R_DIR_PIN,MOTOR_R_PWM_PIN); // Params: sleep(enable) pin, direction pin, pwm pin
-
-        // Initialize heading to 0
-        heading = 0;
-
-        // Set class objects
-        imu = mpu;
-        sonicSensor = sonic;
-        periphs = pins;
-        lcd = screen;
     }
 
     //  Move the robot forward a given number of cm's
     void forward(double dist_cm)
     {      
-      unsigned long timestep = 0;             //  Time (in microseconds) since last IMU measurement
-      unsigned long prevTimeStep = 0;         //  Time value of previous IMU measurement
-      double imuVals[6];                      //  Array for storing IMU metrics
-      double startHeading = heading;          //  Initial heading
-      
       // Compute number of pulses needed
       int nPulses = floor(dist_cm / cmPerPulse) + driveSpeed;
 
@@ -96,10 +77,10 @@ class Motors {
      while(getEncoderLeftCnt() < nPulses && getEncoderRightCnt() < nPulses)
      {
         // Check if imu should be polled, in accordance with imu session
-        if((millis() - imu->session->getStartTime()) % imu->session->sampleRateMs == 0)
+        if((millis() - sensors->imu->session->getStartTime()) % sensors->imu->session->sampleRateMs == 0)
         {
          // Poll imu and save data in current imu session
-         imu->poll(); 
+         sensors->imu->poll(); 
         }
 
         // Gradually increase speed
@@ -217,11 +198,11 @@ class Motors {
         // Wait for motor encoder to read nPulses
         while(getEncoderRightCnt() < nPulses || getEncoderRightCnt() < nPulses)
         {
-          // Check if imu should be polled, in accordance with imu session
-          if((millis() - imu->session->getStartTime()) % imu->session->sampleRateMs == 0)
+          //Check if imu should be polled, in accordance with imu session
+          if((millis() - sensors->imu->session->getStartTime()) % sensors->imu->session->sampleRateMs == 0)
           {
            // Poll imu and save data in current imu session
-           imu->poll(); 
+           sensors->imu->poll(); 
           }
           
           // Check forward facing sensors
@@ -256,10 +237,10 @@ class Motors {
         while(getEncoderLeftCnt() < nPulses || getEncoderRightCnt() < nPulses)
         {
           // Check if imu should be polled, in accordance with imu session
-          if((millis() - imu->session->getStartTime()) % imu->session->sampleRateMs == 0)
+          if(millis() - sensors->imu->session->getStartTime() % sensors->imu->session->sampleRateMs == 0)
           {
            // Poll imu and save data in current imu session
-           imu->poll(); 
+           sensors->imu->poll(); 
           }
           
           // Check forward facing sensors
@@ -275,46 +256,6 @@ class Motors {
         
         //Serial.println("Pulses needed to turn " + String(nDeg) + " degrees = " + String(nPulses));
         //Serial.println("Actual pulses measured: L = " + String(getEncoderLeftCnt()) + " R = " + String(getEncoderRightCnt()));
-      }
-    }
-
-    // Check bumpers for collision and handle response
-    void checkBumpers()
-    {
-      if(bumpSensors.checkForCollision())
-      {
-        unsigned long start = millis();
-        
-        while(bumpSensors.checkForCollision())
-        {
-          //  Play alert
-          bumpSensors.alert(buzzerPin);
-
-          // Check if anyone has helped marv in the alloted time
-          //reverse(5); // Reverse ~5cm
-          rightMotor.disableMotor();
-          leftMotor.disableMotor();
-        }
-      } else {
-        bumpSensors.setStatusLed(1);
-      }
-    }
-
-    // Monitor forward sensors
-    // Check objects in front of marv and attempt to handle various situations
-    void monitorForwardSensors()
-    {
-      // Check PIR Sensor
-
-      // Check bumpers
-      checkBumpers();
-      long dist = sonicSensor->measure();
-      
-      // Check if object is within forward buffer zone
-      if(dist <= sonicSensor->offsetDist + sonicSensor->bufferDist)
-      {
-        // Reverse away from the object
-        reverse(5);
       }
     }
 
