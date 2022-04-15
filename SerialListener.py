@@ -10,7 +10,7 @@ import serial
 serial_port = 'COM8'
 baud_rate = 115200
 
-output_path = 'data/imu/outputs/' + str(sys.argv[1])
+output_path = 'data/imu/outputs/' + str(sys.argv[1]) + '.txt'
 
 # Open output file
 if not output_path:
