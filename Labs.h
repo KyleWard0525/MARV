@@ -109,7 +109,7 @@ void lab6(Marv* robot)
     robot->motors->turn(-1);
     
     // Measure distance and store it in array
-    distances[i] = robot->frontSonicSensor->measure();
+    distances[i] = robot->sensors->frontSonicSensor->measure();
 
     //output += "Angle = " + String(i+5) + "\t" + "Distance: " + String(distances[i]) + "\n";
     
@@ -142,7 +142,7 @@ void lab6(Marv* robot)
   delay(1500);
   
   // Drive until robot is 30cm from the wall
-  while(robot->frontSonicSensor->measure() > 40)
+  while(robot->sensors->frontSonicSensor->measure() > 40)
   {
     // Drive 5cm forward and display current distance on LED
     robot->motors->forward(1);
@@ -202,7 +202,7 @@ void Quiz17(Marv* robot)
     robot->servo.write(i);
     
     // Measure distance and store in sweep1 array
-    sweep1[i] = robot->frontSonicSensor->measure();
+    sweep1[i] = robot->sensors->frontSonicSensor->measure();
     
     delay(50);
   }
@@ -222,7 +222,7 @@ void Quiz17(Marv* robot)
     delay(50);
     
     // Measure distance and store in sweep2 array
-    sweep2[i] = robot->frontSonicSensor->measure();
+    sweep2[i] = robot->sensors->frontSonicSensor->measure();
   }
 
   // Find index of the minimum value in sweep2
@@ -309,11 +309,7 @@ void Quiz17(Marv* robot)
  }
 
 
-// Struct for storing sweep data
-struct sweep_t {
-  int distanceTraveled;
-  long measurements[180];
-};
+
 
 /**
  * Lab 8 Part 1: 
@@ -335,12 +331,19 @@ void lab8Part1(Marv* robot)
   int sections = totalDist / measureInc;
 
   // Create an array of sweeps to store all measurement data
-  sweep_t sweeps[sections];
+  sweep_t sweeps(sections);
 
-  // TODO: Make an initial sweep before moving
+  // Loop through all the 20cm-sections of the hallway
+  for(int i = 0; i < sections; i++)
+  {
+    // Measure and store data from sonic sensor
+    sweeps[i].distanceTraveled = i * measureInc;  //  Total distance traveled at this step
+    robot->sensors->servoSweep(0, 180, 1, sweeps[i].measurements);
 
+    // Move robot forward 20cm 
+    robot->motors->forward(measureInc);
+  }
 
-  // TODO: Loop through all the sections of the hallway, measuring and storing data every 20cm
   
 }
 
@@ -373,17 +376,22 @@ void lab8Part2(Marv* robot)
   int sections = totalDist / measureInc;
 
   // Create an array of sweeps to store all measurement data
-  sweep_t sweeps[sections];
+  sweep_t sweeps(sections);
 
-  // TODO: Make an initial sweep before moving
-
-  // TODO: Find distance to wall on the left and right
+  // Create variabkes to store the distance to the left and right walls
+  long leftWallDist, rightWallDist = 0;
 
   // TODO: Loop through all the sections of the hallway, measuring and storing data every 20cm
 
-  // TODO: Split measurements into left and right side (right = measurements[0:89], left = measurements[90:179])
-
   // TODO: Search for objects on the left and right side and store their location data
+
+  // Rotate robot 180
+  robot->motors->turn(180);
+
+  // TODO: Split measurements into left and right side (left = measurements[0:89], right = measurements[90:179])
+  // Note: left and right are opposite of lab8Part1() 
+
+  // TODO: Drive to object, turn servo to face object, wait 3s, face servo forward, drive to next object, then drive back to start
 }
 
 
@@ -393,7 +401,7 @@ void lab8Part2(Marv* robot)
 long Quiz14(Marv* robot)
 {
   // Measure sensor
-  long distance = robot->frontSonicSensor->measure();
+  long distance = robot->sensors->frontSonicSensor->measure();
   Serial.println("Distance: " + String(distance) + " cm");
   return distance;
 }
