@@ -27,8 +27,8 @@ class Motors {
     Romi_Motor_Power leftMotor;                       //  For controlling left wheel
     Romi_Motor_Power rightMotor;                      //  For controlling right wheel
     uint16_t buzzerPin = 2;                           //  GPIO pin for the buzzer
-    int driveSpeed = 40;                              //  Default driving speed
-    int turnSpeed = 75;                               //  Default turning speed
+    int driveSpeed = 30;                              //  Default driving speed
+    int turnSpeed = 80;                               //  Default turning speed
 
     //  Main constructor
     Motors(SensorController* _sensors) 
@@ -91,18 +91,31 @@ class Motors {
           rightMotor.setRawSpeed(motorSpeed);
         }
 
+        // Gradually decrease motor speed if distance traveled >= 75%
+        if((getEncoderLeftCnt() >= int(nPulses*0.75)) || (getEncoderRightCnt() >= int(nPulses*0.75)))
+        {
+          // Decrease speed every driveSpeed pulses
+          if(getEncoderLeftCnt() % driveSpeed == 0 || getEncoderRightCnt() % driveSpeed == 0)
+          {
+            motorSpeed--;
+            leftMotor.setRawSpeed(motorSpeed);
+            rightMotor.setRawSpeed(motorSpeed);
+          }
+         }
 
         // Check if motors are turning at different speeds 
         if(getEncoderLeftCnt() > getEncoderRightCnt())
         {
-          leftMotor.setRawSpeed(motorSpeed - 2);
+          leftMotor.setRawSpeed(motorSpeed - 4);
           rightMotor.setRawSpeed(motorSpeed);
         }
         else if(getEncoderRightCnt() > getEncoderLeftCnt())
         {
-          rightMotor.setRawSpeed(motorSpeed - 2);
+          rightMotor.setRawSpeed(motorSpeed - 4);
           leftMotor.setRawSpeed(motorSpeed);
         }
+
+        
         
         // Check forward sensors
         //monitorForwardSensors();
