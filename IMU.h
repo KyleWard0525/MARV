@@ -298,7 +298,7 @@ class IMU {
       data.timepoint = millis() - session->getStartTime();
 
       // Compute change in time since last measurement
-      double dt = (data.timepoint - session->getPrevTimepoint()) / 1000.0;
+      double dt = (data.timepoint - session->prevTimepoint) / 1000.0;
       
       // Update session derivatives
       //heading += (gyroArr[2]/500) * dt;
@@ -320,12 +320,15 @@ class IMU {
       data.roll = pitchRoll[1];
       data.velocity = session->velocity;
       data.distance = session->distance;
-
+        
       // Ensure a valid measurement (MARV should never fly)
-      if(data.Az > 0)
+      if(data.Az >= 0)
       {
+        // Update session's previous time point
+        session->prevTimepoint = data.timepoint;   
+      
         // Add IMU metrics to list
-        session->push(data);
+        session->data->push(data);
   
         // Increment total samples taken
         session->samples++;
