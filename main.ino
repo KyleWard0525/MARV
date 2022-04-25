@@ -1,3 +1,4 @@
+
 /**
  * This file is the main driver for controlling MARV the TI RSLK MAX 
  * Robot
@@ -32,7 +33,7 @@ void setup() {
   delay(1000);
   
   Serial.print("Serial ready!\n");
-
+  
   // Setup peripheral pins struct
   periphs.buzzer = 2;             //  P6_0
   periphs.imuSda = 3;             //  P3_2
@@ -45,6 +46,14 @@ void setup() {
   periphs.startPin = 63;          //  P6_3
   periphs.pirPin = 46;            //  P6_2
   periphs.servoPin = 67;          //  P9_7
+  periphs.lineSensor_0 = 65;      //  P7_0 (NOTE: All line sensor pins are hardwired on the board)
+  periphs.lineSensor_1 = 48;      //  P7_1
+  periphs.lineSensor_2 = 64;      //  P7_2
+  periphs.lineSensor_3 = 47;      //  P7_3
+  periphs.lineSensor_4 = 52;      //  P7_4
+  periphs.lineSensor_5 = 68;      //  P7_5
+  periphs.lineSensor_6 = 53;      //  P7_6
+  periphs.lineSensor_7 = 69;      //  P7_7
 
   // Setup servo pin (Must be initialized here, before other setup)
   servo.attach(periphs.servoPin);
@@ -77,8 +86,7 @@ void setup() {
 
   // Setup PIR Sensor pins
   pinMode(periphs.pirPin, INPUT);
-
-
+  
   robot = new Marv(periphs, &lcdI2C_module);
   Serial.println("\n\nSetup complete!\n");
 }
@@ -89,7 +97,7 @@ void loop(){
   {
     delay(500);
 
-    straightLineTest(robot, 15, 90);
+    lab8Part2(robot);
   }
   
   delay(100); 
