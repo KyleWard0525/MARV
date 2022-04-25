@@ -13,6 +13,8 @@ LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
 // Create a custom type definition for MARV's internal functions
 typedef void (*marv_func_t)(void*);
 
+//****    UTILITY DATASTRUCTURES   ****//
+
 // Struct for storing peripherial pins
 struct pins_t {
   uint16_t buzzer;          //  Passive buzzer
@@ -30,6 +32,14 @@ struct pins_t {
   uint16_t stepIn_3;        //  Input 3 to stepper motor
   uint16_t stepIn_4;        //  Input 4 to stepper motor
   uint16_t servoPin;        //  Signal pin for servo motor
+  uint16_t lineSesnor_0;    //  Input from the 0th IR phototransistor on the line tracking module 
+  uint16_t lineSesnor_1;    //  Input from the 1st IR phototransistor on the line tracking module
+  uint16_t lineSesnor_2;    //  Input from the 2nd IR phototransistor on the line tracking module
+  uint16_t lineSesnor_3;    //  Input from the 3rd IR phototransistor on the line tracking module
+  uint16_t lineSesnor_4;    //  Input from the 4th IR phototransistor on the line tracking module
+  uint16_t lineSesnor_5;    //  Input from the 5th IR phototransistor on the line tracking module
+  uint16_t lineSesnor_6;    //  Input from the 6th IR phototransistor on the line tracking module
+  uint16_t lineSesnor_7;    //  Input from the 7th IR phototransistor on the line tracking module
 };
 
 // Struct for storing one measurement of IMU data
@@ -75,6 +85,33 @@ struct imu_vals_t {
   }
 
 };
+
+// Struct for storing sweep data from the sonic-servo module
+struct sweep_t {
+  int distanceTraveled;
+  long measurements[181];
+
+  // Print measurements [servoPos, dist]
+  void to_string()
+  {
+    Serial.print("\nd=" + String(distanceTraveled) + ",[");
+    int n = 181;
+    
+    for(int i = 0; i < n; i++)
+    {
+      if(i < n - 1)
+      {
+        Serial.print("[" + String(i) + "," + String(measurements[i]) + "],");
+      }
+      else {
+        Serial.print("[" + String(i) + "," + String(measurements[i]) + "]]\n");
+      }
+    }
+  }
+};
+
+
+//****    UTILITY FUNCTIONS   ****//
 
 // Play a beep sound to the buzzer at a given frequency
 void beep(int freq, int buzzer)
@@ -169,7 +206,6 @@ int range_check(long val, long minVal, long maxVal)
   return (val >= minVal) && (val <= maxVal);
 }
 
-
 // Sort an array of longs in ascending order.
 void sort(long *a, int n)
 {
@@ -238,6 +274,15 @@ void printArray(long* vals, uint32_t len)
     else {
       Serial.print(String(vals[i]) + "} \n");
     }
+  }
+}
+
+// Remove an element from an array of longs at a given index
+void removeElement(long *a, int n, int index)
+{
+  for(int i = index; i < n-1; i++)
+  {
+    a[i] = a[i+1];
   }
 }
 
