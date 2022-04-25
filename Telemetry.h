@@ -114,8 +114,51 @@ class IMU_Session {
 };
 
 
+/**
+ * A class for representing a 'session' of sonic servo measurements.
+ * 
+ * 'Session' meaning a task or set of tasks in which X number of sonic servo
+ * sweeps will be taken and measurements stored and grouped together
+ */
+class SonicServo_Session {
 
+  private:
+    unsigned long startTime;                  //  Start time for the session
+    unsigned long endTime;                    //  End time for the session
+    uint32_t szMax;                           //  Max number of sweeps that can be stored in data
 
+    // Internal initializer function
+    void init()
+    {
+      // Set start time
+      startTime = millis();
+
+      // Set max size
+      szMax = 200;
+    }
+
+  public:
+    unsigned long prevTimepoint;              //  Timepoint of last measurement
+    List<sweep_t>* data;                      //  List of servo sweeps
+
+    // Main constructor
+    SonicServo_Session(uint32_t nSweeps)
+    {
+      // Check if n_size is in range
+      if(nSweeps > szMax)
+      {
+        // Set size of data to be max size
+        data = new List<sweep_t>(szMax);
+        Serial.println("\n\nWARNING in SonicServo_Session(): given size of " + String(nSweeps) + " > max size = " + String(szMax) + "\nData size set to: " + String(szMax)); 
+      }
+      else {
+        data = new List<sweep_t>(nSweeps);
+      }
+
+      
+    }
+  
+};
 
 
 
