@@ -12,6 +12,7 @@
 #include "Ultrasonic.h"
 #include "Telemetry.h"
 #include "Utils.h"
+#include "Servo.h"
 
 
 class SensorController {
@@ -28,13 +29,16 @@ class SensorController {
     Servo servo;                            //  Servo API for front sonic sensor assembly
 
     // Main constructor
-    SensorController(pins_t pins)
+    SensorController(pins_t pins, Servo srvo)
     {
       // Set sensor pins
       sensor_pins = pins;
 
       // Initialize sensor objects  //
       
+      // Initialize servo
+      servo = srvo;
+            
       // Initialize IMU
       imu = new IMU(&serialBus);
 
@@ -43,8 +47,7 @@ class SensorController {
       frontSonicSensor->offsetDist = 0;
       frontSonicSensor->bufferDist = 5;
 
-      // Initialize servo
-      servo.attach(sensor_pins.servoPin);
+      
     }
 
     // Check bumpers for collision and handle response
@@ -88,19 +91,19 @@ class SensorController {
     }
 
     // Perform an environmental sweep (assuming the sonic sensor is mounted on top of the servo
-  void servoSweep(uint16_t startPos, uint16_t endPos, uint16_t stepSize, long* outputs, uint32_t delayMs=100)
+  void servoSweep(int startPos, int endPos, int stepSize, long* outputs, uint32_t delayMs=100)
   {
     // Array index (since the loop is using values that may not be from 0-length of array)
-    uint16_t arrIdx = 0;
+    int arrIdx = 0;
     
     // Loop through specified sweep range
-    for(uint16_t i = startPos; i <= endPos; i++)
+    for(int i = startPos; i <= endPos; i++)
     {
       // Move servo and store measurements in return array (outputs)
       servo.write(i);
-      delay(delayMs/2);
+      delayMicroseconds(100);
       outputs[arrIdx] = frontSonicSensor->measure();
-      delay(delayMs/2);
+      delayMicroseconds(100);
       arrIdx++;
     }
 
@@ -108,6 +111,10 @@ class SensorController {
     servo.write(90);
   }
 };
+
+
+
+#endif  //  End SENSOR_CONTROLLER_H
 
 
 
