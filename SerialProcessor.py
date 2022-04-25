@@ -123,42 +123,42 @@ def plot_data(data, save=True, filename='accelerationPlots.png', sample_rate=90)
         fig.savefig(plot_path + filename)
         
         
-    # Apply an fft to the data and plot again
-    data_copy = dict.copy(data)
-    samples = len(data['Time'])
+    # # Apply an fft to the data and plot again
+    # data_copy = dict.copy(data)
+    # samples = len(data['Time'])
     
-    # Apply fft to acceleration data
-    data_copy['Ax'] = fft(data_copy['Ax'])
-    data_copy['Ay'] = fft(data_copy['Ay'])
-    data_copy['Az'] = fft(data_copy['Az'])
-    data_copy['Gz'] = fft(data_copy['Gz'])
+    # # Apply fft to acceleration data
+    # data_copy['Ax'] = fft(data_copy['Ax'])
+    # data_copy['Ay'] = fft(data_copy['Ay'])
+    # data_copy['Az'] = fft(data_copy['Az'])
+    # data_copy['Gz'] = fft(data_copy['Gz'])
     
-    # Compute frequency
-    fft_freq = fftfreq(samples, 1.0/sample_rate)
+    # # Compute frequency
+    # fft_freq = fftfreq(samples, 1.0/sample_rate)
     
-    # Update filename
-    filename = filename.split('.')[0] + '_fft.png'
+    # # Update filename
+    # filename = filename.split('.')[0] + '_fft.png'
     
-    fft_fig, axs = plt.subplots(2, 2, sharex=True, figsize=(15, 10))
+    # fft_fig, axs = plt.subplots(2, 2, sharex=True, figsize=(15, 10))
     
-    axs[0,0].plot(fft_freq, abs(data_copy['Ax']))
-    axs[0,0].set_title('FFT of Lateral Acceleration')
+    # axs[0,0].plot(fft_freq, abs(data_copy['Ax']))
+    # axs[0,0].set_title('FFT of Lateral Acceleration')
     
-    axs[0,1].plot(fft_freq, abs(data_copy['Ay']))
-    axs[0,1].set_title('FFT of Longitudinal Acceleration')
-    axs[0,1].set_xlabel('Frequency (Hz?)')
-    axs[0,1].set_ylabel('Amplitude')
+    # axs[0,1].plot(fft_freq, abs(data_copy['Ay']))
+    # axs[0,1].set_title('FFT of Longitudinal Acceleration')
+    # axs[0,1].set_xlabel('Frequency (Hz?)')
+    # axs[0,1].set_ylabel('Amplitude')
     
-    axs[1,0].plot(fft_freq, abs(data_copy['Az']))
-    axs[1,0].set_title('FFT of Vertical Acceleration')
+    # axs[1,0].plot(fft_freq, abs(data_copy['Az']))
+    # axs[1,0].set_title('FFT of Vertical Acceleration')
     
-    axs[1,1].plot(fft_freq, abs(data_copy['Gz']), 'r')
-    axs[1,1].set_title('FFT of Gz')
+    # axs[1,1].plot(fft_freq, abs(data_copy['Gz']), 'r')
+    # axs[1,1].set_title('FFT of Gz')
     
-    fft_fig.suptitle('MARV IMU FFT Plots: ' + str(filename.split('.')[0]))
+    # fft_fig.suptitle('MARV IMU FFT Plots: ' + str(filename.split('.')[0]))
     
-    if save:
-        fft_fig.savefig(plot_path + filename)
+    # if save:
+    #     fft_fig.savefig(plot_path + filename)
 
 data = read_data(filename)
 
