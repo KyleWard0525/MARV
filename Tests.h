@@ -8,7 +8,6 @@
 #include "Marv.h"
 #include "Telemetry.h"
 
-
 // For testing new functionality
 void testIMU(Marv* robot)
 {
@@ -25,7 +24,7 @@ void testIMU(Marv* robot)
 void straightLineTest(Marv* robot, double dist, uint32_t sampleRateHz)
 {
   // Create an IMU session and set IMU sample rate
-  IMU_Session session(500);
+  IMU_Session session(5);
   session.sampleRateMs = hertzToMilliseconds(sampleRateHz);  //  Convert Hz to milliseconds
 
   // Set IMU session
@@ -36,6 +35,42 @@ void straightLineTest(Marv* robot, double dist, uint32_t sampleRateHz)
 
   // Write measurements over serial
   session.writeToSerial();
+ 
+}
+
+// Test writing sonic sweep data over serial
+void testSweepPrint(Marv* robot)
+{
+  uint32_t nSweeps = 3;
+  int forwardDist = 8;
+
+  List<sweep_t> sweeps(nSweeps);
+
+  for(int i = 0; i < nSweeps; i++)
+  {
+    // Create sweep struct
+    sweep_t sweep;
+    sweep.distanceTraveled = i * forwardDist;
+
+    // Sweep environment
+    int endPos = sizeof(sweep.measurements)/sizeof(sweep.measurements[0]);
+    robot->sensors->servoSweep(0, endPos, 1, sweep.measurements);
+
+    // Add sweep to list
+    sweeps.push(sweep);
+
+    delay(500);
+    robot->motors->forward(forwardDist);
+    delay(500);
+  }
+
+  // Print data to serial
+  Serial.println("<SWEEP_DATA>");
+  for(int i = 0; i <= nSweeps; i++)
+  {
+    sweeps.get(i).to_string();
+  }
+  Serial.println("<END>");
 }
 
 // Test storing data in an IMU session
@@ -70,11 +105,10 @@ void testIMU_Session(Marv* robot)
   Serial.println("<IMU_DATA>");
   for(int i = 0; i < session.samples; i++)
   {
-      session.data[i].to_string();
+      session.data->get(i).to_string();
   }
   Serial.println("<END>");
 }
-
 
 // Test resizing internal IMU session data list
 void testIMU_SessionResize(Marv* robot)
@@ -107,7 +141,7 @@ void testStruct_IMUVals(Marv* robot)
   robot->sensors->imu->poll();
 
   // Get data from session
-  imu_vals_t measurement = robot->sensors->imu->session->at(0);
+  imu_vals_t measurement = robot->sensors->imu->session->data->get(0);
   
   double rawAccels[3];
   measurement.getRawAccels(rawAccels);
@@ -122,11 +156,13 @@ void testStruct_IMUVals(Marv* robot)
 // Test servo sweep util function
 void testServoSweep(Marv* robot)
 {
-  uint32_t minPos = 45;
-  uint32_t maxPos = 170;
-  uint32_t stepSize = 1;
-  uint32_t nPolls = (maxPos - minPos) / stepSize;
+  
+  int minPos = 45;
+  int maxPos = 170;
+  int stepSize = 1;
+  int nPolls = (maxPos - minPos) / stepSize;
   long outputs[nPolls];
+  Serial.println("In testServoSweep()");
   robot->sensors->servoSweep(minPos, maxPos, stepSize, outputs);
   Serial.print("\nMeasurements: ");
   printArray(outputs, nPolls);
