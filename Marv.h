@@ -21,6 +21,7 @@
 #include "Morse.h"
 #include "LCD.h"
 #include "Motors.h"
+#include "List.h"
 
 using namespace std;
 
@@ -79,8 +80,8 @@ class Marv {
     Motors* motors;                       //  API for precise motor controls
     Morse* morse;                         //  Communcation with the outside world through Morse code
     LCD* lcd;                             //  Interface for LCD1602 screen
-    SensorController* sensors;            //  Controller for interfacing with sensor
     Servo servo;
+    SensorController* sensors;            //  Controller for interfacing with sensor
     
     //  Main constructor
     Marv(pins_t peripherals, LiquidCrystal_I2C* lcdI2C)
@@ -90,7 +91,7 @@ class Marv {
       servo.attach(periphs.servoPin);
       
       // Initialize sensors
-      sensors = new SensorController(periphs);
+      sensors = new SensorController(periphs, servo);
 
       // Initialize LCD screen
       lcd = new LCD(lcdI2C);
