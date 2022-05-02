@@ -13,7 +13,7 @@
 #include "Telemetry.h"
 #include "Utils.h"
 #include "Servo.h"
-
+#include "LineTracker.h"
 
 class SensorController {
 
@@ -25,6 +25,7 @@ class SensorController {
     IMU* imu;                               //  IMU interface
     UltrasonicSensor* frontSonicSensor;     //  Forward facing sensor for measuring distance using ultrasound
     UltrasonicSensor* rearSonicSensor;      //  Rear facing sensor for measuring distance using ultrasound
+    LineTracker*  lineTracker;              //  API for line tracking module
     Bumpers bumpers;                        //  Forward facing bump sensors
     Servo servo;                            //  Servo API for front sonic sensor assembly
 
@@ -47,7 +48,8 @@ class SensorController {
       frontSonicSensor->offsetDist = 0;
       frontSonicSensor->bufferDist = 5;
 
-      
+      // Initialize line tracker
+      lineTracker = new LineTracker(sensor_pins);      
     }
 
     // Check bumpers for collision and handle response
@@ -111,25 +113,6 @@ class SensorController {
     servo.write(90);
   }
 };
-
-
-
-#endif  //  End SENSOR_CONTROLLER_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
