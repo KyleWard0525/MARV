@@ -36,6 +36,11 @@ class Bumpers {
       return 0;
     }
 
+    /**
+    * Overload function for checkForCollision() that returns the bumper collided with
+    */
+    
+
     //  Trigger bump alert using LED and buzzer
     void alert(int buzzer)
     {
