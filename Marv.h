@@ -24,6 +24,7 @@
 #include "List.h"
 
 using namespace std;
+using namespace arrays;
 
 // Main class for controlling the robot
 class Marv {
