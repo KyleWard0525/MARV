@@ -51,7 +51,46 @@ void testServo(Marv* robot)
   robot->lcd->showMessage("L = " + String(leftDist) + "cm", -1, 0, 1);
 }
 
+// Test environment localization with the sonic sensor and stepper motor
+void testStepperLocalize(Marv* robot)
+{
+    // Measure front, left, and right distances
+    long frontDist = robot->sensors->frontSonicSensor->measure();
+    Serial.println("\nFront Distance = " + String(frontDist) + "cm");
+    delay(500);
 
+    robot->stepper->turn(-90);
+    delay(500);
+    long leftDist = robot->sensors->frontSonicSensor->measure();
+    Serial.println("Left Distance = " + String(leftDist) + "cm");
+    delay(500);
+
+    robot->stepper->turn(190);
+    delay(500);
+    long rightDist = robot->sensors->frontSonicSensor->measure();
+    Serial.println("Right Distance = " + String(rightDist) + "cm");
+
+    long sideLen = rightDist + leftDist;
+    long rearDist = sideLen - frontDist;
+
+    Serial.println("Rear distance (assuming within square room): " + String(rearDist) + "cm");
+    Serial.println("Side length: " + String(sideLen) + "cm");
+}
+
+// Follow black line test
+void testFollowBlackLine(Marv* robot)
+{
+  robot->lcd->showMessage("Press button to", -1, 0, 0);
+  robot->lcd->showMessage("calibrate...", -1, 0, 1);
+  // Wait for user to initiate sensor calibration
+  while(digitalRead(robot->periphs.startPin) == 0)
+  {
+  
+  }
+  delay(750);
+  robot->lcd->resetScreen();
+  robot->lcd->showMessage("Calibrating...", 5000, 1, 0);
+}
 
 // For testing new functionality
 void testIMU(Marv* robot)
@@ -231,22 +270,6 @@ void testServoSweep(Marv* robot)
   robot->motors->turn(turnAngle);
 }
 
-// Test line tracker api
-void testLineTracker(Marv* robot)
-{
-  uint16_t readings[8];
-
-  robot->motors->driveSpeed = 250;
-  
-  for(int i = 0; i < 4; i++)
-  {
-    robot->sensors->lineTracker->pollSensors(readings, READ_BLACK_LINE);
-    Serial.print("\nLine sensor readings (left to right): ");
-    printArray(readings, 8);
-    robot->motors->forward(2);
-    delay(3000);
-  }
-}
 
 
 #endif  // End TESTS_H
