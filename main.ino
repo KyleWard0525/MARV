@@ -8,16 +8,14 @@
 #include <LiquidCrystal_I2C.h>
 #include "Servo.h"
 #include "Marv.h"
-#include "Morse.h"
-#include "I2C.h"
-#include "IMU.h"
 #include "LCD.h"
 #include "Labs.h"
-#include "Telemetry.h"
 #include "Tests.h"
+#include "StepMotor.h"
 
 Marv* robot;                  //  Main robot driver
 Servo servo;                  //  Servo motor object
+StepMotor* stepper;           //  Stepper motor
 pins_t periphs;               //  Peripheral pins     
 
 void setup() {  
@@ -41,8 +39,8 @@ void setup() {
   periphs.morseLed = 41;          //  P8_5
   periphs.frontTrigPin = 34;      //  P2_3
   periphs.frontEchoPin = 35;      //  P6_7
-  periphs.rearTrigPin = 42;       //  P9_0
-  periphs.rearEchoPin = 43;       //  P8_4
+  //periphs.rearTrigPin = 42;       //  P9_0
+  //periphs.rearEchoPin = 43;       //  P8_4
   periphs.startPin = 63;          //  P6_3
   periphs.pirPin = 46;            //  P6_2
   periphs.servoPin = 67;          //  P9_7
@@ -54,25 +52,44 @@ void setup() {
   periphs.lineSensor_5 = 68;      //  P7_5
   periphs.lineSensor_6 = 53;      //  P7_6
   periphs.lineSensor_7 = 69;      //  P7_7
+  periphs.lineSensor_Even = 61;   //  P5_3
+  periphs.lineSensor_Odd = 45;    //  P9_2 
+  periphs.bumper_0 = BP_SW_PIN_0; //  Bumper switch 0 (FAR RIGHT BUMPER)
+  periphs.bumper_1 = BP_SW_PIN_1; //  Bumper switch 1
+  periphs.bumper_2 = BP_SW_PIN_2; //  Bumper switch 2 
+  periphs.bumper_3 = BP_SW_PIN_3; //  Bumper switch 3
+  periphs.bumper_4 = BP_SW_PIN_4; //  Bumper switch 4
+  periphs.bumper_5 = BP_SW_PIN_5; //  Bumper switch 5 (FAR LEFT BUMPER)
+  periphs.rLed = RED_LED;         //  Onboard Red LED
+  periphs.gLed = GREEN_LED;       //  Onboard Green LED
+  periphs.bLed = BLUE_LED;        //  Onboard Blue LED
+  periphs.stepIn_1 = 42;          //  P9_0
+  periphs.stepIn_2 = 43;          //  P8_4
+  periphs.stepIn_3 = 44;          //  P8_2
+  periphs.stepIn_4 = 60;          //  P8_3
 
   // Setup servo pin (Must be initialized here, before other setup)
   servo.attach(periphs.servoPin);
+
+  stepper = new StepMotor(periphs);
+  stepper->to_string();
+  
 
   pinMode(periphs.startPin, INPUT_PULLUP);
   pinMode(PUSH2, INPUT_PULLUP);
   
   // Set bumper pins as inputs
-  pinMode(BP_SW_PIN_0, INPUT_PULLUP);
-  pinMode(BP_SW_PIN_1, INPUT_PULLUP);
-  pinMode(BP_SW_PIN_2, INPUT_PULLUP);
-  pinMode(BP_SW_PIN_3, INPUT_PULLUP);
-  pinMode(BP_SW_PIN_4, INPUT_PULLUP);
-  pinMode(BP_SW_PIN_5, INPUT_PULLUP);
+  pinMode(periphs.bumper_0, INPUT_PULLUP);
+  pinMode(periphs.bumper_1, INPUT_PULLUP);
+  pinMode(periphs.bumper_2, INPUT_PULLUP);
+  pinMode(periphs.bumper_3, INPUT_PULLUP);
+  pinMode(periphs.bumper_4, INPUT_PULLUP);
+  pinMode(periphs.bumper_5, INPUT_PULLUP);
 
   // Set RGB LEDs as outputs
-  pinMode(RED_LED, OUTPUT);
-  pinMode(GREEN_LED, OUTPUT);
-  pinMode(BLUE_LED, OUTPUT);
+  pinMode(periphs.rLed, OUTPUT);
+  pinMode(periphs.gLed, OUTPUT);
+  pinMode(periphs.bLed, OUTPUT);
   pinMode(periphs.morseLed, OUTPUT);
   
   // Set buzzer pin as output
@@ -81,14 +98,15 @@ void setup() {
   // Setup ultrasonic sensor pins
   pinMode(periphs.frontTrigPin, OUTPUT);
   pinMode(periphs.frontEchoPin, INPUT);
-  pinMode(periphs.rearTrigPin, OUTPUT);
-  pinMode(periphs.rearEchoPin, INPUT);
+  //pinMode(periphs.rearTrigPin, OUTPUT);
+  //pinMode(periphs.rearEchoPin, INPUT);
 
   // Setup PIR Sensor pins
   pinMode(periphs.pirPin, INPUT);
   
   robot = new Marv(periphs, &lcdI2C_module);
   Serial.println("\n\nSetup complete!\n");
+  
 }
 
 void loop(){
@@ -96,8 +114,14 @@ void loop(){
   if(digitalRead(periphs.startPin)==1 || digitalRead(PUSH2)==0)
   {
     delay(500);
+    stepper->turn(45);
+    delay(750);
+    long dist = robot->sensors->frontSonicSensor->measure();
 
-    lab8Part2(robot);
+    Serial.println("\nDistance = " + String(dist) + "cm");
+    
+    //testServo(robot);
+    //lab9Part1(robot);
   }
   
   delay(100); 
