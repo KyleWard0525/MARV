@@ -51,7 +51,7 @@ class StepMotor {
     // Turn a specified number of degrees
     void turn(int deg)
     {
-      int steps = (deg * stepsPerDeg) + (stepsPerRev * sign(deg)) + ((stepsPerTurn / stepsPerRev) * sign(deg));
+      int steps = (deg * stepsPerDeg) + (stepsPerRev * sign(deg)) + ((stepsPerTurn / stepsPerRev / 2) * sign(deg));
       _stepper->step(steps);
       off();
     }
