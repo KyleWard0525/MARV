@@ -8,6 +8,51 @@
 #include "Marv.h"
 #include "Telemetry.h"
 
+// Gradually increase motor speed test
+void testSpeedGradIncrease(Marv* robot)
+{
+  int startSpeed = 5;
+  int endSpeed = 250;
+
+  // Set robot's speed parameters
+  robot->motors->setStartSpeed(startSpeed);
+  robot->motors->driveSpeed = endSpeed;
+
+  // Initiate test
+  robot->motors->forward(300);
+  delay(1000);
+
+  robot->motors->turn(90);
+  delay(500);
+  robot->motors->turn(-90);
+  delay(500);
+}
+
+void testServo(Marv* robot)
+{
+  robot->servo.write(0);
+  delay(500);
+  long dist = robot->sensors->frontSonicSensor->measure();
+  delay(500);
+
+  robot->lcd->showMessage("R = " + String(dist) + "cm", -1, 0, 0);
+  delay(1000);
+
+  robot->motors->turnSpeed = 30;
+  robot->motors->turn(-1);
+  delay(500);
+  robot->servo.write(180);
+  delay(500);
+  long leftDist = robot->sensors->frontSonicSensor->measure();
+  delay(500);
+  robot->motors->turn(1);
+  delay(500);
+  
+  robot->lcd->showMessage("L = " + String(leftDist) + "cm", -1, 0, 1);
+}
+
+
+
 // For testing new functionality
 void testIMU(Marv* robot)
 {
@@ -186,8 +231,22 @@ void testServoSweep(Marv* robot)
   robot->motors->turn(turnAngle);
 }
 
+// Test line tracker api
+void testLineTracker(Marv* robot)
+{
+  uint16_t readings[8];
 
-
+  robot->motors->driveSpeed = 250;
+  
+  for(int i = 0; i < 4; i++)
+  {
+    robot->sensors->lineTracker->pollSensors(readings, READ_BLACK_LINE);
+    Serial.print("\nLine sensor readings (left to right): ");
+    printArray(readings, 8);
+    robot->motors->forward(2);
+    delay(3000);
+  }
+}
 
 
 #endif  // End TESTS_H
