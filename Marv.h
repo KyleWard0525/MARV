@@ -22,6 +22,7 @@
 #include "LCD.h"
 #include "Motors.h"
 #include "List.h"
+#include "StepMotor.h"
 
 using namespace std;
 using namespace arrays;
@@ -83,6 +84,7 @@ class Marv {
     LCD* lcd;                             //  Interface for LCD1602 screen
     Servo servo;
     SensorController* sensors;            //  Controller for interfacing with sensor
+    StepMotor* stepper;                   //  Stepper motor interface
     
     //  Main constructor
     Marv(pins_t peripherals, LiquidCrystal_I2C* lcdI2C)
@@ -105,6 +107,9 @@ class Marv {
       // Initialize motors
       motors = new Motors(sensors);
       Serial.println("Motors initialized.");
+
+      // Initialize stepper motor
+      stepper = new StepMotor(periphs);
 
       // Set MARV's initial internal states and variables
       emotions.feeling = emotions.Idle;
