@@ -12,6 +12,12 @@ LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
 
 // Create a custom type definition for MARV's internal functions
 typedef void (*marv_func_t)(void*);
+typedef unsigned int uint_t;
+
+
+#define ARRAY_SIZE(x) sizeof(x)/sizeof(x[0])
+
+
 
 //****    UTILITY DATASTRUCTURES   ****//
 
@@ -32,14 +38,25 @@ struct pins_t {
   uint16_t stepIn_3;        //  Input 3 to stepper motor
   uint16_t stepIn_4;        //  Input 4 to stepper motor
   uint16_t servoPin;        //  Signal pin for servo motor
-  uint16_t lineSesnor_0;    //  Input from the 0th IR phototransistor on the line tracking module 
-  uint16_t lineSesnor_1;    //  Input from the 1st IR phototransistor on the line tracking module
-  uint16_t lineSesnor_2;    //  Input from the 2nd IR phototransistor on the line tracking module
-  uint16_t lineSesnor_3;    //  Input from the 3rd IR phototransistor on the line tracking module
-  uint16_t lineSesnor_4;    //  Input from the 4th IR phototransistor on the line tracking module
-  uint16_t lineSesnor_5;    //  Input from the 5th IR phototransistor on the line tracking module
-  uint16_t lineSesnor_6;    //  Input from the 6th IR phototransistor on the line tracking module
-  uint16_t lineSesnor_7;    //  Input from the 7th IR phototransistor on the line tracking module
+  uint16_t lineSensor_0;    //  Input from the 0th IR phototransistor on the line tracking module 
+  uint16_t lineSensor_1;    //  Input from the 1st IR phototransistor on the line tracking module
+  uint16_t lineSensor_2;    //  Input from the 2nd IR phototransistor on the line tracking module
+  uint16_t lineSensor_3;    //  Input from the 3rd IR phototransistor on the line tracking module
+  uint16_t lineSensor_4;    //  Input from the 4th IR phototransistor on the line tracking module
+  uint16_t lineSensor_5;    //  Input from the 5th IR phototransistor on the line tracking module
+  uint16_t lineSensor_6;    //  Input from the 6th IR phototransistor on the line tracking module
+  uint16_t lineSensor_7;    //  Input from the 7th IR phototransistor on the line tracking module
+  uint16_t lineSensor_Even; //  Control even IR sensors pin
+  uint16_t lineSensor_Odd;  //  Control odd IR sensors pin
+  uint16_t bumper_0;        //  Bumper 0 pin
+  uint16_t bumper_1;        //  Bumper 1 pin
+  uint16_t bumper_2;        //  Bumper 2 pin
+  uint16_t bumper_3;        //  Bumper 3 pin
+  uint16_t bumper_4;        //  Bumper 4 pin
+  uint16_t bumper_5;        //  Bumper 5 pin
+  uint16_t rLed;            //  Onboard red LED
+  uint16_t gLed;            //  Onboard green LED
+  uint16_t bLed;            //  Onboard blue LED 
 };
 
 // Struct for storing one measurement of IMU data
@@ -112,6 +129,7 @@ struct sweep_t {
 
 
 //****    UTILITY FUNCTIONS   ****//
+
 
 // Play a beep sound to the buzzer at a given frequency
 void beep(int freq, int buzzer)
@@ -206,7 +224,43 @@ int range_check(long val, long minVal, long maxVal)
   return (val >= minVal) && (val <= maxVal);
 }
 
-// Sort an array of longs in ascending order.
+// Convert Hertz to milliseconds
+double hertzToMilliseconds(int hertz)
+{
+  return 1000.0 / hertz;
+}
+
+// Convert milliseconds to Hertz
+double millisecondsToHertz(int milliseconds)
+{
+  return (1.0/milliseconds) * 1000.0;
+}
+
+// Convert servo position to turn angle
+int servoPosToTurnAngle(int servoPos)
+{
+  return map(servoPos, 0, 180, 90, -90);
+}
+
+int sign(int x)
+{
+  if(x < 0)
+  {
+    return -1;
+  }
+  else if( x > 0)
+  {
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
+
+
+namespace arrays {
+  
+  // Sort an array of longs in ascending order.
 void sort(long *a, int n)
 {
     int i, j;
@@ -241,49 +295,126 @@ int minIndex(long *a, int n)
     }
     return minIndex;
 }
-
-// Convert Hertz to milliseconds
-double hertzToMilliseconds(int hertz)
-{
-  return 1000.0 / hertz;
-}
-
-// Convert milliseconds to Hertz
-double millisecondsToHertz(int milliseconds)
-{
-  return (1.0/milliseconds) * 1000.0;
-}
-
-// Convert servo position to turn angle
-int servoPosToTurnAngle(int servoPos)
-{
-  return map(servoPos, 0, 180, 90, -90);
-}
-
-// Print an array of values
-void printArray(long* vals, uint32_t len)
-{
-  Serial.print("{");
-
-  for(int i = 0; i < len; i++)
+  
+  // Print an array of values
+  void printArray(long* vals, uint32_t len)
   {
-    if(i != len-1)
+    Serial.print("{");
+  
+    for(int i = 0; i < len; i++)
     {
-      Serial.print(String(vals[i]) + ", ");
-    }
-    else {
-      Serial.print(String(vals[i]) + "} \n");
+      if(i != len-1)
+      {
+        Serial.print(String(vals[i]) + ", ");
+      }
+      else {
+        Serial.print(String(vals[i]) + "} \n");
+      }
     }
   }
-}
-
-// Remove an element from an array of longs at a given index
-void removeElement(long *a, int n, int index)
-{
-  for(int i = index; i < n-1; i++)
+  
+  // Print an array of values
+  void printArray(uint16_t* vals, uint_t len)
   {
-    a[i] = a[i+1];
+    Serial.print("{");
+  
+    for(int i = 0; i < len; i++)
+    {
+      if(i != len-1)
+      {
+        Serial.print(String(vals[i]) + ", ");
+      }
+      else {
+        Serial.print(String(vals[i]) + "} \n");
+      }
+    }
   }
+  
+  // Remove an element from an array of longs at a given index
+  void removeElement(long *a, int n, int index)
+  {
+    for(int i = index; i < n-1; i++)
+    {
+      a[i] = a[i+1];
+    }
+  }
+  
+  // Reverse an array of uint16_t
+  void reverseArray(uint16_t *a, int n)
+  {
+    for(int i = 0; i < n/2; i++)
+    {
+      uint16_t temp = a[i];
+      a[i] = a[n-i-1];
+      a[n-i-1] = temp;
+    }
+  }
+  
+  // Clear an array of ints
+  void clearArray(uint16_t *a, int n)
+  {
+    for(int i = 0; i < n; i++)
+    {
+      a[i] = 0;
+    }
+  }
+  
+  // Check if an int array is empty
+  bool isEmpty(uint16_t *a, int n)
+  {
+    for(int i = 0; i < n; i++)
+    {
+      if(a[i] != 0)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  // Check if an int array is full
+  bool isFull(uint16_t *a, int n)
+  {
+    for(int i = 0; i < n; i++)
+    {
+      if(a[i] == 0)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  // Check number of elements in an array of ints
+  int numElements(uint16_t *a, int n)
+  {
+    int count = 0;
+    for(int i = 0; i < n; i++)
+    {
+      if(a[i] != 0)
+      {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  // Get the index of the largest value in an array of ints
+  int maxIndex(uint16_t *a, int n)
+  {
+    int maxVal = a[0];
+    int maxIndex = 0;
+    for (int i = 1; i < n; i++)
+    {
+      if (a[i] > maxVal)
+      {
+        maxVal = a[i];
+        maxIndex = i;
+      }
+    }
+    return maxIndex;
+  }
+
 }
 
 
