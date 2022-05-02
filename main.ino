@@ -70,11 +70,7 @@ void setup() {
 
   // Setup servo pin (Must be initialized here, before other setup)
   servo.attach(periphs.servoPin);
-
-  stepper = new StepMotor(periphs);
-  stepper->to_string();
   
-
   pinMode(periphs.startPin, INPUT_PULLUP);
   pinMode(PUSH2, INPUT_PULLUP);
   
@@ -114,13 +110,8 @@ void loop(){
   if(digitalRead(periphs.startPin)==1 || digitalRead(PUSH2)==0)
   {
     delay(500);
-    stepper->turn(45);
-    delay(750);
-    long dist = robot->sensors->frontSonicSensor->measure();
 
-    Serial.println("\nDistance = " + String(dist) + "cm");
-    
-    //testServo(robot);
+    testFollowBlackLine(robot);
     //lab9Part1(robot);
   }
   
