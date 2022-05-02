@@ -6,6 +6,10 @@
  * kward
  */
 
+#include "Utils.h"
+
+using namespace arrays;
+
 class UltrasonicSensor {
   private:
     uint16_t echoPin;
