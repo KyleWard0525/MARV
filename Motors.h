@@ -21,14 +21,15 @@ class Motors {
     const float wheelDiameter = 6.9999;             //  Wheel diameter in cm
     const float wheelBase = 14;                     //  Wheel base in cm
     const float gearRatio = 120;                    //  120:1 because ratio = (360 / pulses per motor revolution(3))
+    int startSpeed = 15;                            //  Initial speed to start moving forward at
     double cmPerPulse;                              //  Centimeters traveled per pulse
     SensorController* sensors;                      //  API for the sensors
   public:
     Romi_Motor_Power leftMotor;                       //  For controlling left wheel
     Romi_Motor_Power rightMotor;                      //  For controlling right wheel
     uint16_t buzzerPin = 2;                           //  GPIO pin for the buzzer
-    int driveSpeed = 40;                              //  Default driving speed
-    int turnSpeed = 100;                               //  Default turning speed
+    int driveSpeed = 70;                              //  Default driving speed
+    int turnSpeed = 70;                               //  Default turning speed
 
     //  Main constructor
     Motors(SensorController* _sensors)
@@ -65,8 +66,7 @@ class Motors {
       leftMotor.enableMotor();
       rightMotor.enableMotor();
 
-      // Set motor speed (start moving)
-      int motorSpeed = 10;
+      int motorSpeed = startSpeed;
       leftMotor.setRawSpeed(motorSpeed);
       rightMotor.setRawSpeed(motorSpeed);
 
@@ -84,7 +84,7 @@ class Motors {
         //        }
 
         // Gradually increase speed
-        if ((motorSpeed < driveSpeed) && (getEncoderLeftCnt() % driveSpeed == 0))
+        if ((motorSpeed < driveSpeed) && (getEncoderLeftCnt() % nPulses == 0 || getEncoderRightCnt() % nPulses == 0))
         {
           motorSpeed++;
           leftMotor.setRawSpeed(motorSpeed+1);
@@ -292,6 +292,11 @@ class Motors {
     float getPulsesPerMotorRev()
     {
       return pulsesPerMotorRev;
+    }
+
+    void setStartSpeed(int speed)
+    {
+      startSpeed = speed;
     }
 };
 
