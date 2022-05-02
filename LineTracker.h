@@ -7,7 +7,9 @@
  * 
  * @author kward
  */ 
+#include "SimpleRSLK.h"
 #include "QTRSensors.h"
+#include "Marv.h"
 
 enum PollingType {
   READ_RAW,
@@ -17,36 +19,13 @@ enum PollingType {
 };
 
 class LineTracker {
-
   private: 
     pins_t pins;
-    QTRSensors lineSensors;
-    QTRReadMode defaultReadMode;
-
-    /**
-     * Initialize the IR line tracking sensor
-     */
-    void init()
-    {
-      // Cast down to 8-bits for QTRSensors API
-      const uint8_t ir_pins[8] = {pins.lineSensor_0,pins.lineSensor_1,pins.lineSensor_2,pins.lineSensor_3,
-                                  pins.lineSensor_4,pins.lineSensor_5,pins.lineSensor_6,pins.lineSensor_7};
-                                  
-      //  Initialize internal sensor controller  //
-
-      // Set sensor pins and set type to RC
-      lineSensors.setSensorPins(ir_pins, 8);
-      lineSensors.setTypeRC();
-
-      // Set emitter pins
-      lineSensors.setEmitterPins(pins.lineSensor_Odd, pins.lineSensor_Even);
-
-      // Set default read mode
-      defaultReadMode = QTRReadMode::On;
-
-      // Calibrate sensors
-      lineSensors.calibrate(defaultReadMode);
-    }
+    bool calibrated;
+    uint16_t sensorReadings[LS_NUM_SENSORS];
+    uint16_t calibratedReadings[LS_NUM_SENSORS];
+    uint16_t maxReadings[LS_NUM_SENSORS];
+    uint16_t minReadings[LS_NUM_SENSORS];
 
   public:
     QTRReadMode readMode;
@@ -57,84 +36,76 @@ class LineTracker {
     LineTracker(pins_t periphs)
     {
       pins = periphs;
-
-      // Initialize line tracking module
-      init();
-
-      // Set readMode to default
-      readMode = defaultReadMode;
-
-      printConfig();
+      setupRSLK();
+      clearMinMax(minReadings, maxReadings);
+      calibrated = false;
     }
 
-    String sensorType()
-    {
-      QTRType _type = lineSensors.getType();
-      if(_type == QTRType::Undefined)
-      {
-        return "Undefined";
-      }
-      else if(_type == QTRType::RC)
-      {
-        return "RC";
-      }
-      else {
-        return "Analog";
-      }
-    }
-
-    /**
-     * Print current configuration
+    /*
+     * Calibrate the line tracking sensors by driving straight and acquiring min and max 
+     * values read from the surronding environment
      */
-    void printConfig()
+    void calibrate()
     {
-      Serial.println("\nLine Tracker Config:");
-      Serial.println("---------------------");
-      Serial.println("Sensor type: " + sensorType());
-      Serial.println("Emitter pins: " + String(lineSensors.getEmitterPinCount()));
-      Serial.println("Dimmable: " + String(lineSensors.getDimmable()));
-      Serial.println("Dimming Level: " + String(lineSensors.getDimmingLevel()));
-      Serial.println("Timeout duration: " + String(lineSensors.getTimeout()) + "us\n");
-    }
+      // Set motors to drive forward 
+      setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);
+      enableMotor(BOTH_MOTORS);
+      setMotorSpeed(BOTH_MOTORS, 20);
 
-    /**
-     * Read data from sensors.
-     * 
-     * Values range from 0 (brightest, highest reflectance) to 1000 (darkest, lowest reflectance)
-     */
-    void pollSensors(uint16_t* readings, PollingType type)
-    {
-      // Select polling type
-      switch(type)
+      for(int i = 0; i < random(100,150); i++)
       {
-        case READ_RAW:
-          lineSensors.read(readings, readMode);           //  Read raw sensor values
-          break;
+        // Poll the line tracking sensors
+        readLineSensor(sensorReadings);
 
-        case READ_CALIBRATED:
-          lineSensors.readCalibrated(readings, readMode); //  Read raw sensor values
-          break;
-
-        case READ_BLACK_LINE:
-          lineSensors.readLineBlack(readings, readMode);
-          break;
-
-        case READ_WHITE_LINE:
-          lineSensors.readLineWhite(readings, readMode);
-
+        // Update the minimum and maximum readings
+        setSensorMinMax(sensorReadings, minReadings, maxReadings);
       }
 
-      //  Reverse array so it reads from leftmost sensor (7) to rightmost sensor (0)
-      arrays::reverseArray(readings, ARRAY_SIZE(readings));   
+      // Set calibrated flag
+      calibrated = true;
+      disableMotor(BOTH_MOTORS);
     }
 
-    /**
-     * Recalibrate sensors
-     */
-  void recalibrate()
-  {
-    lineSensors.calibrate(readMode);
-  }
+    // Follow the black line until it terminates in a "T" intersection
+    void followBlackLine()
+    {
+      // Initialize wheel speeds
+      int innerWheelSpeed = 15;
+      int outerWheelSpeed = 30;
+      
+      // Loop until all sensors find a line
+      while(!isFull(sensorReadings, LS_NUM_SENSORS))
+      {
+        // Read the line sensors then read their calibrated values
+        readLineSensor(sensorReadings);
+        readCalLineSensor(sensorReadings, calibratedReadings, minReadings, maxReadings, DARK_LINE);
+
+        // Calculate the position of the black line
+        uint32_t linePos = getLinePosition(calibratedReadings,DARK_LINE);
+        delay(10);
+
+        if(linePos > 0 && linePos < 3000) 
+        {
+          setMotorSpeed(LEFT_MOTOR,innerWheelSpeed);
+          setMotorSpeed(RIGHT_MOTOR,outerWheelSpeed);
+        } 
+        else if(linePos > 3500) 
+        {
+          setMotorSpeed(LEFT_MOTOR,outerWheelSpeed);
+          setMotorSpeed(RIGHT_MOTOR,innerWheelSpeed);
+        } 
+        else {
+          setMotorSpeed(LEFT_MOTOR,innerWheelSpeed);
+          setMotorSpeed(RIGHT_MOTOR,innerWheelSpeed);
+        }
+      }
+    }
+    
+    
+    bool isCalibrated()
+    {
+      return calibrated;
+    }
 };
 
 
