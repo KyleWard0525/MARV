@@ -11,12 +11,7 @@
 #include "QTRSensors.h"
 #include "Marv.h"
 
-enum PollingType {
-  READ_RAW,
-  READ_CALIBRATED,
-  READ_BLACK_LINE,
-  READ_WHITE_LINE
-};
+
 
 class LineTracker {
   private: 
@@ -29,6 +24,16 @@ class LineTracker {
 
   public:
     QTRReadMode readMode;
+
+    enum MODES {
+        Idle,
+        Calibrating,
+        Following
+    } mode;
+
+    motor_func_t motorsReverse;
+    motor_func_t motorsTurn;
+    motor_func_t motorsForward;
     
     /**
      * Main constructor
@@ -39,6 +44,9 @@ class LineTracker {
       setupRSLK();
       clearMinMax(minReadings, maxReadings);
       calibrated = false;
+
+      // Set mode
+      mode = MODES::Idle;
     }
 
     /*
@@ -50,9 +58,9 @@ class LineTracker {
       // Set motors to drive forward 
       setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);
       enableMotor(BOTH_MOTORS);
-      setMotorSpeed(BOTH_MOTORS, 20);
+      setMotorSpeed(BOTH_MOTORS, 10);
 
-      for(int i = 0; i < random(100,150); i++)
+      for(int i = 0; i < 100; i++)
       {
         // Poll the line tracking sensors
         readLineSensor(sensorReadings);
@@ -66,24 +74,82 @@ class LineTracker {
       disableMotor(BOTH_MOTORS);
     }
 
+    // Initiate continuous calibration
+    void startCalibrating()
+    {
+      mode = MODES::Calibrating;
+      calibrated = false;
+    }
+
+    // Stop continuous calibration
+    void stopCalibrating()
+    {
+      mode = MODES::Idle;
+      calibrated = true;
+    }
+
+    // Poll line sensors for continuous calibration
+    void pollSensors()
+    {
+      // Poll the line tracking sensors
+      readLineSensor(sensorReadings);
+
+      // Update the minimum and maximum readings
+      setSensorMinMax(sensorReadings, minReadings, maxReadings);
+    }
+
+    // Check for a black line
+    int checkForBlackLine(int threshold)
+    {
+      // Initialize raw and calibrated arrays to all zeros
+      arrays::clearArray(sensorReadings, 8);
+      arrays::clearArray(calibratedReadings, 8);
+
+      // Read the line sensors then read their calibrated values
+      readLineSensor(sensorReadings);
+      readCalLineSensor(sensorReadings, calibratedReadings, minReadings, maxReadings, DARK_LINE);
+
+      // Check if a sensor was activated
+      if(sensorsActivated(calibratedReadings, 8, threshold) >= 1)
+      {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    }
+
     // Follow the black line until it terminates in a "T" intersection
     void followBlackLine()
     {
       // Initialize wheel speeds
-      int innerWheelSpeed = 15;
-      int outerWheelSpeed = 30;
+      int innerWheelSpeed = 10;
+      int outerWheelSpeed = 20;
+
+      int readingThreshold = 1000;
       
-      // Loop until all sensors find a line
-      while(!isFull(sensorReadings, LS_NUM_SENSORS))
+      setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);
+      enableMotor(BOTH_MOTORS);
+      setMotorSpeed(BOTH_MOTORS, innerWheelSpeed);
+
+     arrays::clearArray(calibratedReadings, 8); 
+      
+      while(sensorsActivated(calibratedReadings, 8, readingThreshold) != 8)
       {
         // Read the line sensors then read their calibrated values
         readLineSensor(sensorReadings);
         readCalLineSensor(sensorReadings, calibratedReadings, minReadings, maxReadings, DARK_LINE);
 
+        // This means the robot left the line (it didn't end with a T)
+        if(sensorsActivated(calibratedReadings, 8, readingThreshold) == 0)
+        {
+          
+        }
+  
         // Calculate the position of the black line
         uint32_t linePos = getLinePosition(calibratedReadings,DARK_LINE);
         delay(10);
-
+  
         if(linePos > 0 && linePos < 3000) 
         {
           setMotorSpeed(LEFT_MOTOR,innerWheelSpeed);
@@ -99,13 +165,52 @@ class LineTracker {
           setMotorSpeed(RIGHT_MOTOR,innerWheelSpeed);
         }
       }
-    }
+      disableMotor(BOTH_MOTORS);
+   }  
+
+  // Clear raw and calibrated sensor readings
+  void clearReadings()
+  {
+    arrays::clearArray(sensorReadings, 8);
+    arrays::clearArray(calibratedReadings, 8);
+  }
     
-    
-    bool isCalibrated()
+  bool isCalibrated()
+  {
+    return calibrated;
+  }
+
+  void getRawReadings(uint16_t* retArr)
+  {
+    for(int i = 0; i < LS_NUM_SENSORS; i++)
     {
-      return calibrated;
+      retArr[i] = sensorReadings[i];
     }
+  }
+
+  void getCalibratedReadings(uint16_t* retArr)
+  {
+    for(int i = 0; i < LS_NUM_SENSORS; i++)
+    {
+      retArr[i] = calibratedReadings[i];
+    }
+  }
+
+  void getMinReadings(uint16_t* retArr)
+  {
+    for(int i = 0; i < LS_NUM_SENSORS; i++)
+    {
+      retArr[i] = minReadings[i];
+    }
+  }
+
+  void getMaxReadings(uint16_t* retArr)
+  {
+    for(int i = 0; i < LS_NUM_SENSORS; i++)
+    {
+      retArr[i] = maxReadings[i];
+    }
+  }
 };
 
 

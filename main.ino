@@ -111,9 +111,12 @@ void loop(){
   {
     delay(500);
 
-    testFollowBlackLine(robot);
-    //lab9Part1(robot);
+    //testFollowBlackLine(robot);
+    //solveMaze(robot);
+    lab9(robot);
   }
+
+  robot->sensors->monitorForwardSensors();
   
   delay(100); 
 }

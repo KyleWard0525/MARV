@@ -12,6 +12,10 @@ LiquidCrystal_I2C lcdI2C_module(0x27,16,2);
 
 // Create a custom type definition for MARV's internal functions
 typedef void (*marv_func_t)(void*);
+
+// Create a callback type for motor functions
+typedef void(*motor_func_t)(int);
+
 typedef unsigned int uint_t;
 
 
@@ -168,7 +172,7 @@ void alarm(int freq, int buzzer, double dur, int beeps, int led)
     case BLUE_LED:
       // Ensure red and blue led are low
       digitalWrite(RED_LED, LOW);
-      digitalWrite(BLUE_LED, LOW);
+      digitalWrite(GREEN_LED, LOW);
       break;
 
     // Yellow LED will be used
@@ -257,6 +261,23 @@ int sign(int x)
   }
 }
 
+// Return the number of line sensors activated within a certain threshold
+int sensorsActivated(uint16_t* readings, int n, int threshold)
+{
+  int activations = 0;
+
+  // Loop through sensor readings
+  for(int i = 0; i < n; i++)
+  {
+    // Check if reading is at or above threshold
+    if(readings[i] >= threshold)
+    {
+      activations++;
+    }
+  }
+
+  return activations;
+}
 
 namespace arrays {
   
@@ -277,6 +298,21 @@ void sort(long *a, int n)
             }
         }
     }
+}
+
+int maxIndex(long *a, int n)
+{
+  int maxVal = a[0];
+  int maxIndex = 0;
+  for (int i = 1; i < n; i++)
+  {
+    if (a[i] > maxVal)
+    {
+      maxVal = a[i];
+      maxIndex = i;
+    }
+  }
+  return maxIndex;
 }
 
 // Find the index of the minimum value in an array of longs.

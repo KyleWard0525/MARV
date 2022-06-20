@@ -82,6 +82,34 @@ void testFollowBlackLine(Marv* robot)
 {
   robot->lcd->showMessage("Press button to", -1, 0, 0);
   robot->lcd->showMessage("calibrate...", -1, 0, 1);
+  
+  // Wait for user to initiate sensor calibration
+  while(digitalRead(robot->periphs.startPin) == 0)
+  {
+  
+  }
+  delay(750);
+
+  // Calibrate line sensors
+  robot->lcd->resetScreen();
+  robot->lcd->showMessage("Calibrating...", -1, 1, 0);
+  robot->sensors->lineTracker->calibrate();
+  robot->lcd->resetScreen();
+
+  // Ensure calibration was successful
+  if(robot->sensors->lineTracker->isCalibrated())
+  {
+    robot->lcd->resetScreen();
+    robot->lcd->showMessage("Calibrated!", 3000, 1, 0);
+  }
+  else {
+    robot->lcd->showMessage("Cal. Failure!", -1, 0, 0);
+    alarm(300, robot->periphs.buzzer, 1000, 5, RED_LED);
+  }
+
+  robot->lcd->showMessage("Press button to", -1, 0, 0);
+  robot->lcd->showMessage("Start...", -1, 0, 1);
+
   // Wait for user to initiate sensor calibration
   while(digitalRead(robot->periphs.startPin) == 0)
   {
@@ -89,7 +117,10 @@ void testFollowBlackLine(Marv* robot)
   }
   delay(750);
   robot->lcd->resetScreen();
-  robot->lcd->showMessage("Calibrating...", 5000, 1, 0);
+
+  // Follow black line
+  robot->sensors->lineTracker->followBlackLine();
+  alarm(300, robot->periphs.buzzer, 1000, 3, BLUE_LED);
 }
 
 // For testing new functionality
@@ -98,7 +129,7 @@ void testIMU(Marv* robot)
   double arr[3];
   
   robot->sensors->imu->getAccels(arr);
-  Serial.print("\nAx = " + String(arr[0]) + "g");
+  Serial.print("\nAx = " + String(arr[0]) + "g ");
   Serial.print("\tAy = " + String(arr[1]) + "g");
   Serial.print("\tAz = " + String(arr[2]) + "g\n");
   delay(1000);

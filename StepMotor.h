@@ -56,6 +56,8 @@ class StepMotor {
       off();
     }
 
+
+
     // Turn off all inputs to the motor driver
     void off()
     {

@@ -114,6 +114,11 @@ class Marv {
       // Set MARV's initial internal states and variables
       emotions.feeling = emotions.Idle;
 
+      // Set Marv callback functions for SensorController
+      sensors->motorsReverse = (motor_func_t)&Motors::reverse;
+      sensors->motorsTurn = (motor_func_t)&Motors::turn;
+      sensors->motorsForward = (motor_func_t)&Motors::forward;
+
       // Signal that MARV is ready to go
       signalReady();
     }

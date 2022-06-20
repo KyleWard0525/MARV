@@ -28,6 +28,13 @@ class SensorController {
     LineTracker*  lineTracker;              //  API for line tracking module
     Bumpers bumpers;                        //  Forward facing bump sensors
     Servo servo;                            //  Servo API for front sonic sensor assembly
+    bool monitorBlackLine;                  //  Flag for if robot should activate line following if found
+
+
+    // Initiate callback variables for Motor functions since Energia doesn't allow inheritance.. like why even have C++ support??????
+    motor_func_t motorsReverse;
+    motor_func_t motorsTurn;
+    motor_func_t motorsForward;
 
     // Main constructor
     SensorController(pins_t pins, Servo srvo)
@@ -50,6 +57,12 @@ class SensorController {
 
       // Initialize line tracker
       lineTracker = new LineTracker(sensor_pins);      
+
+      lineTracker->motorsReverse = motorsReverse;
+      lineTracker->motorsTurn = motorsTurn;
+      lineTracker->motorsForward = motorsForward;
+
+      monitorBlackLine = false;
     }
 
     // Check bumpers for collision and handle response
@@ -65,8 +78,8 @@ class SensorController {
           //  Play alert
           bumpers.alert(sensor_pins.buzzer);
 
-          // Check if anyone has helped marv in the alloted time
-          //reverse(5); // Reverse ~5cm
+          // Reverse away from the object
+          motorsReverse(frontSonicSensor->bufferDist);
         }
       } else {
         bumpers.setStatusLed(1);
@@ -78,18 +91,29 @@ class SensorController {
     // TODO: Determine a way to return necessary data
     void monitorForwardSensors()
     {
-      // Check PIR Sensor
-
-      // Check bumpers
-      checkBumpers();
       long dist = frontSonicSensor->measure();
       
       // Check if object is within forward buffer zone
       if(dist <= frontSonicSensor->offsetDist + frontSonicSensor->bufferDist)
       {
         // Reverse away from the object
-        //reverse(5);
+        motorsReverse(frontSonicSensor->bufferDist);
       }
+      
+      // Check if black line monitoring is on
+      if(monitorBlackLine)
+      {
+        // Check if a sensor was activated
+        if(lineTracker->checkForBlackLine(900))
+        {
+         // Start following black line
+         lineTracker->followBlackLine();
+        }
+      }
+
+      // Check bumpers
+      checkBumpers();
+      
     }
 
     // Perform an environmental sweep (assuming the sonic sensor is mounted on top of the servo

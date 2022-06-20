@@ -8,6 +8,7 @@
  */
 #include "Marv.h"
 #include "Servo.h"
+#include "List.h"
 
 /* 
  *  Lab 5 demo
@@ -324,26 +325,38 @@ void Quiz17(Marv* robot)
  */
 void lab8Part1(Marv* robot)
 {
-  int totalDist = 3000; //  3m
+  int totalDist = 300; //  3m
   int measureInc = 20;  // Increments of 20cm between measurements
 
   // Divide the total path into sections relative to the measurement interval
   int sections = totalDist / measureInc;
 
-  // Create an array of sweeps to store all measurement data
-  sweep_t sweeps(sections);
+  // Create a list of sweeps to store all measurement data
+  List<sweep_t> sweeps(sections);
 
   // Loop through all the 20cm-sections of the hallway
   for(int i = 0; i < sections; i++)
   {
+    // Create struct to store sweep data
+    sweep_t sweep;
+    
     // Measure and store data from sonic sensor
-    sweeps[i].distanceTraveled = i * measureInc;  //  Total distance traveled at this step
-    robot->sensors->servoSweep(0, 180, 1, sweeps[i].measurements);
+    sweep.distanceTraveled = i * measureInc;  //  Total distance traveled at this step
+    int endPos = sizeof(sweep.measurements)/sizeof(sweep.measurements[0]);
+    robot->sensors->servoSweep(0, endPos, 1, sweep.measurements);
+
+    // Push sweep to list of sweeps
+    sweeps.push(sweep);
 
     // Move robot forward 20cm 
     robot->motors->forward(measureInc);
   }
 
+  // Print sweep data
+  for(int i = 0; i < sweeps.len()+1; i++)
+  {
+    sweeps.get(i).to_string();
+  }
   
 }
 
@@ -367,31 +380,181 @@ void lab8Part1(Marv* robot)
     d.  turn the servo forward 
     e.  start moving again towards the starting point 
  */
+struct obj_location_t {
+  int path_distance;        //  Distance traveled 
+  int servoPos;             //  Servo position 
+  long sonic_distance;      //  Distance measured by the ultrasonic sensor
+};
+
 void lab8Part2(Marv* robot)
 {
-  int totalDist = 3000; //  3m
+  int totalDist = 300; //  3m (CHANGE BACK TO 300CM AFTER TESTING)
   int measureInc = 20;  // Increments of 20cm between measurements
 
   // Divide the total path into sections relative to the measurement interval
   int sections = totalDist / measureInc;
 
-  // Create an array of sweeps to store all measurement data
-  sweep_t sweeps(sections);
+  // Create a list of sweeps to store all measurement data
+  List<sweep_t> sweeps(sections);
 
-  // Create variabkes to store the distance to the left and right walls
-  long leftWallDist, rightWallDist = 0;
 
-  // TODO: Loop through all the sections of the hallway, measuring and storing data every 20cm
 
-  // TODO: Search for objects on the left and right side and store their location data
+  //*** Step 1: Travel down the hallway taking measurements ***//
+
+  
+  // Loop through all the 20cm-sections of the hallway
+  for(int i = 0; i < sections; i++)
+  {
+    // Create struct to store sweep data
+    sweep_t sweep;
+    
+    // Measure and store data from sonic sensor
+    sweep.distanceTraveled = i * measureInc;  //  Total distance traveled at this step
+    int endPos = sizeof(sweep.measurements)/sizeof(sweep.measurements[0]);
+    robot->sensors->servoSweep(0, endPos, 1, sweep.measurements);
+
+    // Move robot forward 20cm 
+    robot->motors->forward(measureInc);
+
+    // Push sweep to list of sweeps
+    sweeps.push(sweep);
+  }
+
+
+
+
+ //*** Step 2: Rotate 180 and compute location of objects ***//
+
 
   // Rotate robot 180
-  robot->motors->turn(180);
+  delay(1000);
+  robot->motors->turn(190);
+  delay(1000);
 
-  // TODO: Split measurements into left and right side (left = measurements[0:89], right = measurements[90:179])
+  // Find objects on left and right side (left = measurements[0:89], right = measurements[90:179])
   // Note: left and right are opposite of lab8Part1() 
+  obj_location_t objects[3];          // Structs for storing object locations
 
-  // TODO: Drive to object, turn servo to face object, wait 3s, face servo forward, drive to next object, then drive back to start
+  
+  long minIndices[sections];  // Indices of all closest sonic distances measured (NOTE: each index corresponds to the servo position at which the measurement was made)
+  long minDistances[sections];// Parallel (corresponding) array of those distance values
+
+  // Loop through sweeps
+  for(int i = 0; i < sections; i++)
+  {
+    // Get sweep data from list
+    sweep_t sweep = sweeps.get(i);
+    
+    // Find the index (servo position) of the minumum distance in each sweep
+    minIndices[i] = minIndex(sweep.measurements, sizeof(sweep.measurements)/sizeof(sweep.measurements[0]));
+    minDistances[i] = sweep.measurements[minIndices[i]];
+  }
+
+  // Pick the 3 closest object detected
+  // NOTE: This means objects are originally sorted by sonic distance, in ascending order
+  for(int i = 0; i < 3; i++)
+  {
+    // Get the index of the sweep with the current minimum sonic distance measured
+    int sweepIdx = minIndex(minDistances, sections);
+
+    // Get the minimum sonic distance measured from that sweep
+    long sonicDist = minDistances[sweepIdx];
+
+    // Get the position of the servo at which the minimum distance was measured
+    int servoPos = minIndices[sweepIdx];
+
+    // Store data about the object 
+    objects[i].servoPos = servoPos;
+    objects[i].sonic_distance = sonicDist;
+    objects[i].path_distance = sweepIdx * measureInc; // Distance robot has traveled at this point in time
+
+    // Set the minimum distance value of this sweep to no longer be the minimum (so we can find the next closest object with the next loop iteration)
+    minDistances[sweepIdx] = 9999999;
+  }
+
+  
+  // Sort objects based on path distance (highest to lowest bc we're traveling in the opposite direction)
+  for(int i = 0; i < 2; i++)
+  {
+    for(int j = i+1; j < 3; j++)
+    {
+      if(objects[i].path_distance < objects[j].path_distance)
+      {
+        // Swap objects
+        obj_location_t temp = objects[i];
+        objects[i] = objects[j];
+        objects[j] = temp;
+      }
+    }
+   }
+
+
+
+  //*** Step 3: Drive to each object and point the servo at it ***//
+
+
+  // Check whether or not the last (now first) object was at the end
+  if(objects[0].path_distance < totalDist)
+  {
+    // Move the robot to the first object
+    robot->motors->forward(totalDist - objects[0].path_distance);
+  }
+
+  if(objects[0].servoPos < 90)
+  {
+    robot->servo.write(0);
+  }
+  else {
+    // Point servo at the first object and wait 3s
+    robot->servo.write(180);
+  }
+  
+  delay(3000);
+  robot->servo.write(90);        // Return servo to face forward
+  delay(400);
+
+  // Move to the next object
+  robot->motors->forward(objects[0].path_distance - objects[1].path_distance);
+
+   if(objects[1].servoPos < 90)
+  {
+    robot->servo.write(0);
+  }
+  else {
+    // Point servo at the first object and wait 3s
+    robot->servo.write(180);
+  }
+
+  delay(3000);
+  robot->servo.write(90);        // Return servo to face forward
+  delay(400);
+
+  // Move to the last object
+  robot->motors->forward(objects[1].path_distance - objects[2].path_distance);
+
+  if(objects[2].servoPos < 90)
+  {
+    robot->servo.write(180);
+  }
+  else {
+    // Point servo at the first object and wait 3s
+    robot->servo.write(0);
+  }
+
+  delay(3000);
+  robot->servo.write(90);        // Return servo to face forward
+  delay(400);
+
+  // Check if the last object was at the start/finish line
+  if(objects[2].path_distance > 0)
+  {
+    // Move the last X cm to the end
+    robot->motors->forward(objects[2].path_distance);
+  }
+
+  // Signal complete
+  delay(200);
+  robot->morse->k();
 }
 
 
@@ -407,6 +570,274 @@ long Quiz14(Marv* robot)
 }
 
 
+// Find and move to the center of a square room
+void findAndGoToCenter(Marv* robot)
+{
+  /**
+   * Given the shape of the arena the robot will be placed in, we know that
+   * every side will be the exact same length. Thus, we can take 3 measurements: left, forward, right
+   * to discern the distance to the left wall, right wall, and wall directly ahead. Using this, we can
+   * calculate the distance to the wall behind and therefore devise a location of the robot in the room
+   */
+
+   // Measure front, left, and right distances
+  long frontWallDist = robot->sensors->frontSonicSensor->measure();
+  delay(500);
+
+  robot->stepper->turn(-90);
+  delay(500);
+  long leftWallDist = robot->sensors->frontSonicSensor->measure();
+  delay(500);
+
+  robot->stepper->turn(190);
+  delay(500);
+  long rightWallDist = robot->sensors->frontSonicSensor->measure();
+
+  delay(500);
+  
+  // Return stepper to the center
+  robot->stepper->turn(-90);
+  delay(500);
+  
+  long sideLen = rightWallDist + leftWallDist;
+  long rearWallDist = sideLen - frontWallDist;
+  
+   // Compute robot's horizontal and vertical distance to the center of the room
+   long hDist = (sideLen/2) - min(leftWallDist, rightWallDist);
+   long vDist = (sideLen/2) - min(frontWallDist, rearWallDist);
+
+   // Move forward
+   if(rearWallDist < frontWallDist)
+   {
+      robot->motors->forward(vDist);
+      delay(500);
+      
+      if(leftWallDist < rightWallDist)
+      {
+        robot->motors->turn(90);
+      }
+      else if (rightWallDist > leftWallDist) {
+        robot->motors->turn(-90);
+      }
+      delay(500);
+      robot->motors->forward(hDist);
+   }
+   // Turn around and move back
+   else if(rearWallDist > frontWallDist)
+   {
+    robot->motors->turn(220);
+    delay(500);
+    robot->motors->forward(vDist);
+    delay(500);
+  
+    if(leftWallDist < rightWallDist)
+      {
+        robot->motors->turn(-90);
+      }
+      else if(leftWallDist > rightWallDist){
+        robot->motors->turn(90);
+      }
+   }
+   delay(500);
+   robot->motors->forward(hDist);
+   delay(100);
+}
+
+// Find black line
+int findBlackLine(Marv* robot)
+{
+  uint16_t sensorReadings[8];
+  uint16_t calibratedReadings[8];
+  uint16_t minReadings[8];
+  uint16_t maxReadings[8];
+
+  // Initialize raw and calibrated arrays to all zeros
+  //arrays::clearArray(sensorReadings, 8);
+  //arrays::clearArray(calibratedReadings, 8);
+  
+  // Get min and max readings from calibrated line tracker
+  robot->sensors->lineTracker->getMinReadings(minReadings);
+  robot->sensors->lineTracker->getMaxReadings(maxReadings);
+
+  int lineThreshold = 1000;
+  int attempts = 0;
+  
+   // Read the line sensors then read their calibrated values
+   readLineSensor(sensorReadings);
+   readCalLineSensor(sensorReadings, calibratedReadings, minReadings, maxReadings, DARK_LINE);
+  
+  // Move in all directions until the line is found
+  while(sensorsActivated(calibratedReadings, 8, lineThreshold) < 1)
+  {
+    // Turn, move forward, and check for black line
+    robot->motors->turn(-1);
+    delay(500);
+    robot->motors->forward(1);
+    delay(500);
+
+    // Read line sensors again
+    readLineSensor(sensorReadings);
+    readCalLineSensor(sensorReadings, calibratedReadings, minReadings, maxReadings, DARK_LINE);
+
+    // Check again for line
+    if(sensorsActivated(calibratedReadings, 8, lineThreshold) < 1)
+    {
+      // Move back to the original spot and look in next location
+      robot->motors->reverse(5);
+      delay(500);
+    }
+    // Line found at new location
+    else {
+      return 1;
+    }
+
+    // Increment number of attempts
+    attempts++;
+
+    // Stop if robot can't find the line in a reasonable search area
+    if(attempts >= 50)
+    {
+      return 0;
+    }
+   }
+
+  return 1;
+}
+
+// Front, left, right sweep
+void flrSweep(Marv* robot, long* front, long* left, long* right)
+{
+  // Measure distance in front
+  front[0] = robot->sensors->frontSonicSensor->measure();
+  delay(50);
+  
+  // Turn stepper and measure distance to the left
+  robot->stepper->turn(-90);
+  delay(100);
+  left[0] = robot->sensors->frontSonicSensor->measure();
+
+  // Turn stepper and measure distance to the right
+  robot->stepper->turn(190);
+  delay(100);
+  right[0] = robot->sensors->frontSonicSensor->measure();
+
+  // Return servo to center
+  robot->stepper->turn(-90);
+}
+
+// Find the way out of the maze by following the left wall
+void solveMaze(Marv* robot)
+{
+  int maxWallDist = 240;
+
+  // Setup variables for storing flr sweeps
+  long front[1] = {0};
+  long left[1] = {0};
+  long right[1] = {0};
+
+  // Perform first sweep 
+  flrSweep(robot, front, left, right);
+
+  robot->lcd->resetScreen();
+  
+  // Loop until the left or right measurements are >= maxWallDist
+  while(left[0] < maxWallDist && right[0] < maxWallDist)
+  {
+    // Merge values into a long array
+    long vals[3] = {front[0], left[0], right[0]}; 
+    int maxIdx = arrays::maxIndex(vals, 3);
+    
+    // Find the index of the max value
+    switch(maxIdx)
+    {
+      // Front is the farthest away
+      case 0:
+        robot->lcd->showMessage("Front", -1, 1, 0);
+      
+        // Move forward half the distance
+        robot->motors->forward(vals[maxIdx]/2);
+        delay(100);
+        break;
+
+      // Left is farthest away
+      case 1:
+        robot->lcd->showMessage("Left", -1, 1, 0);
+      
+        // Turn 90deg to the left
+        robot->motors->turn(-90);
+        delay(750);
+
+        // Move forward half the distance
+        robot->motors->forward(vals[maxIdx]/2);
+        delay(100);
+        break;
+
+      // Right is farthest away
+      case 2:
+        robot->lcd->showMessage("Right", -1, 1, 0);
+        
+        // Turn 90deg to the right
+        robot->motors->turn(90);
+        delay(750);
+    
+        // Move forward half the distance
+        robot->motors->forward(vals[maxIdx]/2);
+        delay(100);
+        break;
+    }
+
+    // Perform the next sweep 
+    flrSweep(robot, front, left, right);
+  }
+}
+
+/**
+ * Lab 9 - Part 1
+ * 
+ * The robot will be placed at a random location in a square with sides that could
+ * be from 100cm - 240cm. The robot must find its location in the room and drive towards 
+ * the center
+ */
+ 
+void lab9(Marv* robot)
+{
+  // Set line tracker to start calibrating
+  robot->sensors->lineTracker->calibrate();
+
+  // Tell robot to start monitoring forward sensors
+  robot->motors->monitorFront = true;
+  //robot->sensors->monitorBlackLine = true;
+  
+//  // Find the center of the room and move to it
+//  findAndGoToCenter(robot);
+//
+//  // Start searching for black line
+//  if(findBlackLine(robot))
+//  {
+//    robot->lcd->resetScreen();
+//    // Show line follow message
+//    robot->lcd->showMessage("Making way", -1, 1, 0);
+//    robot->lcd->showMessage("downtown...", -1, 1, 1);
+//    
+//    // Start following line
+//    delay(500);
+    
+//  }
+//  else {
+//    robot->lcd->showMessage("Failed to find", -1, 0, 0);
+//    robot->lcd->showMessage("black line :(", -1, 0, 1);
+//    alarm(500, robot->periphs.buzzer, 5000, 1, RED_LED);
+//  }
+  
+  robot->lcd->resetScreen();
+  delay(500);
+
+  robot->sensors->lineTracker->followBlackLine();
+  solveMaze(robot);
+
+  // Sound alarm when done
+  alarm(500, robot->periphs.buzzer, 350, 3, GREEN_LED);
+}
 
 
 
