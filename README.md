@@ -14,7 +14,7 @@ As of v0.0.2, MARV uses the following hardware:
 - HC-SR04 Ultrasonic Sensor
 
 ## Software
-All of the software is being written in C/C++ using the Energia IDE
+All of the software was written in C/C++ using the Energia IDE
 
 ## Features
 
@@ -42,9 +42,3 @@ that may still include bugs or unfinished components.
 - Forward collision detection
 - Collision alert (via onboard LED and active buzzer)
 - Morse code communication through LED blinks and buzzer beeps
-
-## Upcoming Updates:
-- Collision avoidance
-- Follow mode (robot follows the user around)
-- Use measurements from IMU to determine orientation in order to get out of a bad spot
-- Add oscilating ultrasonic sensor assembly using stepper motor and 3 ultrasonic sensors in a triangle configuration in attempt to create a 3D map of the robot's current environment using ultrasound
