@@ -1,5 +1,5 @@
 # MARV (Mildly Autonomous Robotic Vehicle)
-MARV is being designed and built as a way for me to gain an introdcution to robotics and hopefully make a little robot friend.
+MARV was designed and built as a way for me to gain an introdcution to robotics and hopefully make a little robot friend.
 
 ## Hardware
 As of v0.0.2, MARV uses the following hardware:
